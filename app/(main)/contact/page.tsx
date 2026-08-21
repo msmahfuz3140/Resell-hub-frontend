@@ -11,6 +11,7 @@ import {
   ChevronDown,
   Sparkles,
   CheckCircle2,
+  Headphones,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -50,7 +51,7 @@ export default function ContactPage() {
     setIsSubmitting(true);
     setTimeout(() => {
       setIsSubmitting(false);
-      toast.success("Thank you! Your message has been sent to support.");
+      toast.success("Thank you! Your inquiry has been dispatched to our support team.");
       setName("");
       setEmail("");
       setMessage("");
@@ -59,70 +60,67 @@ export default function ContactPage() {
 
   return (
     <div className="bg-slate-50 min-h-screen py-12">
-      <div className="container mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3.5 py-1.5 rounded-full border border-indigo-100">
-            Get in Touch
+          <span className="text-xs font-black uppercase tracking-widest text-indigo-600 bg-indigo-50 px-3.5 py-1.5 rounded-full border border-indigo-100">
+            24/7 Assistance
           </span>
-          <h1 className="text-3xl sm:text-4xl font-black text-slate-900 mt-3 mb-4 tracking-tight">
-            We&apos;re Here to Help You
+          <h1 className="text-3xl sm:text-5xl font-black text-slate-900 mt-3 mb-4 tracking-tight">
+            How Can We Assist You?
           </h1>
           <p className="text-slate-500 text-sm sm:text-base">
-            Have questions about a listing, payment, or partnership? Reach out to our 24/7 dedicated support team.
+            Have questions about an ad, escrow payment, or dispute? Our Dhaka-based support team is here to help.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 mb-16">
-          {/* ── Contact Info Cards (5 Cols) ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
+          {/* ── Left Column: Contact Methods (5 Cols) ── */}
           <div className="lg:col-span-5 space-y-6">
-            <div className="bg-gradient-to-br from-indigo-900 to-slate-900 text-white p-8 rounded-3xl shadow-xl space-y-6">
-              <h2 className="text-2xl font-bold">Contact Information</h2>
-              <p className="text-indigo-200 text-xs sm:text-sm leading-relaxed">
-                Connect directly with our team in Dhaka or drop us a query anytime.
-              </p>
+            <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white p-8 rounded-3xl shadow-xl space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
+                  <Headphones size={20} />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold">Direct Channels</h2>
+                  <span className="text-xs text-indigo-300">Fast response guaranteed</span>
+                </div>
+              </div>
 
-              <div className="space-y-4 pt-2">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-indigo-300 shrink-0">
-                    <Mail size={18} />
-                  </div>
+              <div className="space-y-4 pt-2 text-xs">
+                <div className="flex items-start gap-4 p-3.5 rounded-2xl bg-white/5 border border-white/10">
+                  <Mail size={18} className="text-indigo-400 shrink-0 mt-0.5" />
                   <div>
-                    <span className="text-xs text-indigo-300 block">Email Support</span>
-                    <span className="text-sm font-semibold">support@resellhub.com</span>
+                    <span className="text-indigo-300 font-bold block">Email Support</span>
+                    <span className="text-sm font-bold text-white">support@resellhub.com</span>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-indigo-300 shrink-0">
-                    <Phone size={18} />
-                  </div>
+                <div className="flex items-start gap-4 p-3.5 rounded-2xl bg-white/5 border border-white/10">
+                  <Phone size={18} className="text-indigo-400 shrink-0 mt-0.5" />
                   <div>
-                    <span className="text-xs text-indigo-300 block">Customer Helpline</span>
-                    <span className="text-sm font-semibold">+880 1700-000000</span>
+                    <span className="text-indigo-300 font-bold block">Helpline Number</span>
+                    <span className="text-sm font-bold text-white">+880 1700-000000</span>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-indigo-300 shrink-0">
-                    <MapPin size={18} />
-                  </div>
+                <div className="flex items-start gap-4 p-3.5 rounded-2xl bg-white/5 border border-white/10">
+                  <MapPin size={18} className="text-indigo-400 shrink-0 mt-0.5" />
                   <div>
-                    <span className="text-xs text-indigo-300 block">Head Office</span>
-                    <span className="text-sm font-semibold leading-relaxed">
+                    <span className="text-indigo-300 font-bold block">Headquarters</span>
+                    <span className="text-xs font-semibold text-white leading-relaxed">
                       House 42, Road 11, Block D, Gulshan-1, Dhaka 1212
                     </span>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-indigo-300 shrink-0">
-                    <Clock size={18} />
-                  </div>
+                <div className="flex items-start gap-4 p-3.5 rounded-2xl bg-white/5 border border-white/10">
+                  <Clock size={18} className="text-indigo-400 shrink-0 mt-0.5" />
                   <div>
-                    <span className="text-xs text-indigo-300 block">Support Hours</span>
-                    <span className="text-sm font-semibold">
-                      Saturday – Thursday: 9:00 AM – 10:00 PM
+                    <span className="text-indigo-300 font-bold block">Support Availability</span>
+                    <span className="text-xs font-semibold text-white">
+                      Saturday – Thursday: 9:00 AM – 10:00 PM BST
                     </span>
                   </div>
                 </div>
@@ -130,38 +128,38 @@ export default function ContactPage() {
             </div>
 
             {/* Live Chat prompt */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
-                  <MessageSquare size={20} />
+            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex items-center justify-between">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                  <MessageSquare size={22} />
                 </div>
                 <div>
-                  <h4 className="font-bold text-xs text-slate-900">Need Instant Help?</h4>
-                  <span className="text-[11px] text-slate-500">Live chat average reply time: &lt; 5 mins</span>
+                  <h4 className="font-black text-xs text-slate-900">Need Immediate Help?</h4>
+                  <span className="text-[11px] text-slate-500 font-medium">Average chat reply: &lt; 5 minutes</span>
                 </div>
               </div>
               <button
                 type="button"
-                onClick={() => toast.info("Opening Live Support chat widget...")}
-                className="px-3.5 py-1.5 bg-emerald-600 text-white font-bold text-xs rounded-lg hover:bg-emerald-700 transition-colors"
+                onClick={() => toast.info("Opening 24/7 Live Support widget...")}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl transition-colors"
               >
                 Chat Now
               </button>
             </div>
           </div>
 
-          {/* ── Contact Form (7 Cols) ── */}
-          <div className="lg:col-span-7 bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
-            <h2 className="text-2xl font-bold text-slate-900 mb-2">Send us a Message</h2>
-            <p className="text-slate-500 text-xs sm:text-sm mb-6">
-              Fill out the form below and a representative will get back to you within 24 hours.
+          {/* ── Right Column: Message Form (7 Cols) ── */}
+          <div className="lg:col-span-7 bg-white p-8 sm:p-10 rounded-3xl border border-slate-200/90 shadow-sm">
+            <h2 className="text-2xl font-black text-slate-900 mb-1">Send us an Inquiry</h2>
+            <p className="text-slate-500 text-xs sm:text-sm mb-8 font-normal">
+              Our support team reviews each message and responds within 24 business hours.
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                    Your Name *
+                  <label className="block text-xs font-extrabold text-slate-700 mb-1.5">
+                    Your Full Name *
                   </label>
                   <input
                     type="text"
@@ -169,11 +167,11 @@ export default function ContactPage() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Mahfuzul Haque"
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-indigo-500 focus:bg-white"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold outline-none focus:border-indigo-500 focus:bg-white transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                  <label className="block text-xs font-extrabold text-slate-700 mb-1.5">
                     Email Address *
                   </label>
                   <input
@@ -182,53 +180,53 @@ export default function ContactPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-indigo-500 focus:bg-white"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold outline-none focus:border-indigo-500 focus:bg-white transition-all"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                <label className="block text-xs font-extrabold text-slate-700 mb-1.5">
                   Subject Category
                 </label>
                 <select
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-indigo-500 focus:bg-white"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-bold text-slate-800 outline-none focus:border-indigo-500 focus:bg-white transition-all"
                 >
-                  <option>General Inquiry</option>
-                  <option>Payment / Escrow Support</option>
-                  <option>Report Fraud or Suspicious User</option>
-                  <option>Seller Verification Request</option>
-                  <option>Business Partnership</option>
+                  <option>General Inquiry & Questions</option>
+                  <option>Escrow Payment & Payouts</option>
+                  <option>Dispute / Defective Product Report</option>
+                  <option>Seller Badge Verification</option>
+                  <option>Partnership & Advertising</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                  Message *
+                <label className="block text-xs font-extrabold text-slate-700 mb-1.5">
+                  Your Message *
                 </label>
                 <textarea
                   required
                   rows={5}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Describe your issue or feedback in detail..."
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-indigo-500 focus:bg-white resize-none"
+                  placeholder="Provide all relevant details, item IDs, or questions..."
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium outline-none focus:border-indigo-500 focus:bg-white transition-all resize-none"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="btn btn-primary w-full py-3.5 rounded-xl font-bold text-sm shadow-md flex items-center justify-center gap-2"
+                className="btn-shiny-primary w-full py-4 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg"
               >
                 {isSubmitting ? (
-                  <span>Sending message...</span>
+                  <span>Sending inquiry...</span>
                 ) : (
                   <>
                     <Send size={16} />
-                    <span>Send Message</span>
+                    <span>Submit Message</span>
                   </>
                 )}
               </button>
@@ -236,34 +234,34 @@ export default function ContactPage() {
           </div>
         </div>
 
-        {/* ── FAQ Section ── */}
-        <div className="max-w-3xl mx-auto pt-8 border-t border-slate-200">
+        {/* ── FAQ ACCORDION ── */}
+        <div className="max-w-3xl mx-auto pt-10 border-t border-slate-200">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-slate-900">Frequently Asked Questions</h2>
-            <p className="text-slate-500 text-xs mt-1">Quick answers to common inquiries</p>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Frequently Asked Questions</h2>
+            <p className="text-slate-500 text-xs mt-1">Instant answers to standard marketplace questions</p>
           </div>
 
           <div className="space-y-3">
             {FAQS.map((faq, idx) => (
               <div
                 key={idx}
-                className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs"
+                className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs"
               >
                 <button
                   type="button"
                   onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                  className="w-full p-4 text-left font-bold text-sm text-slate-800 flex items-center justify-between gap-4"
+                  className="w-full p-4 sm:p-5 text-left font-bold text-sm text-slate-900 flex items-center justify-between gap-4"
                 >
                   <span>{faq.q}</span>
                   <ChevronDown
                     size={16}
-                    className={`text-slate-400 shrink-0 transition-transform ${
+                    className={`text-slate-400 shrink-0 transition-transform duration-200 ${
                       openFaq === idx ? "rotate-180 text-indigo-600" : ""
                     }`}
                   />
                 </button>
                 {openFaq === idx && (
-                  <div className="px-4 pb-4 text-xs text-slate-600 leading-relaxed border-t border-slate-50 pt-2">
+                  <div className="px-5 pb-5 text-xs text-slate-600 leading-relaxed border-t border-slate-50 pt-3 font-normal">
                     {faq.a}
                   </div>
                 )}

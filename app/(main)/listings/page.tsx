@@ -13,12 +13,16 @@ import {
   Tag,
   ChevronDown,
   X,
+  MapPin,
+  Flame,
+  CheckCircle2,
+  ShieldCheck,
 } from "lucide-react";
 import ProductCard from "@/components/ui/ProductCard";
 import { CATEGORIES } from "@/lib/constants";
 import type { Product } from "@/types";
 
-// Mock Database of Products for rich showcase & filtering
+// Mock Database for rich browsing
 const ALL_PRODUCTS: Product[] = [
   {
     _id: "prod-1",
@@ -286,10 +290,9 @@ function ListingsContent() {
   const [priceMax, setPriceMax] = useState<number>(200000);
   const [showMobileFilter, setShowMobileFilter] = useState(false);
 
-  // Filter and Sort Logic
+  // Filter & Sort Algorithm
   const filteredProducts = useMemo(() => {
     return ALL_PRODUCTS.filter((item) => {
-      // Search
       if (search.trim()) {
         const query = search.toLowerCase();
         const matchTitle = item.title.toLowerCase().includes(query);
@@ -297,27 +300,10 @@ function ListingsContent() {
         const matchCat = item.category.toLowerCase().includes(query);
         if (!matchTitle && !matchDesc && !matchCat) return false;
       }
-
-      // Category
-      if (selectedCategory !== "All" && item.category !== selectedCategory) {
-        return false;
-      }
-
-      // Condition
-      if (selectedCondition !== "All" && item.condition !== selectedCondition) {
-        return false;
-      }
-
-      // City
-      if (selectedCity !== "All Locations" && item.location.city !== selectedCity) {
-        return false;
-      }
-
-      // Price
-      if (item.price > priceMax) {
-        return false;
-      }
-
+      if (selectedCategory !== "All" && item.category !== selectedCategory) return false;
+      if (selectedCondition !== "All" && item.condition !== selectedCondition) return false;
+      if (selectedCity !== "All Locations" && item.location.city !== selectedCity) return false;
+      if (item.price > priceMax) return false;
       return true;
     }).sort((a, b) => {
       if (sortBy === "price_asc") return a.price - b.price;
@@ -338,57 +324,76 @@ function ListingsContent() {
 
   return (
     <div className="bg-slate-50 min-h-screen py-10">
-      <div className="container mx-auto px-4">
-        {/* Top Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-            Explore All Listings
-          </h1>
-          <p className="text-slate-500 text-sm sm:text-base mt-1">
-            Browse verified second-hand items across Bangladesh.
-          </p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Page Header */}
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-black uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
+                Live Feed
+              </span>
+              <span className="text-xs text-slate-400 font-medium">Updated every 5 mins</span>
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight mt-1">
+              Marketplace Listings
+            </h1>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-slate-400 font-bold hidden sm:inline">Sort:</span>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="text-xs font-bold bg-white text-slate-700 py-2.5 px-4 rounded-xl border border-slate-200 shadow-xs outline-none cursor-pointer"
+            >
+              <option value="latest">Newest First</option>
+              <option value="price_asc">Price: Low to High</option>
+              <option value="price_desc">Price: High to Low</option>
+              <option value="popular">Most Popular Deals</option>
+            </select>
+          </div>
         </div>
 
-        {/* Search & Main Bar */}
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        {/* ── Search & Filter Pill Bar ── */}
+        <div className="bg-white p-3 sm:p-4 rounded-3xl border border-slate-200/80 shadow-sm mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
           {/* Search box */}
           <div className="relative w-full md:w-96">
-            <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search products by keyword..."
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:border-indigo-500 focus:bg-white transition-all"
+              placeholder="Search by keywords, model, brand..."
+              className="w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-semibold text-slate-800 outline-none focus:border-indigo-500 focus:bg-white transition-all"
             />
             {search && (
               <button
                 type="button"
                 onClick={() => setSearch("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
               >
                 <X size={16} />
               </button>
             )}
           </div>
 
-          {/* Quick Category Tabs */}
-          <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-none">
+          {/* Category Quick Chips */}
+          <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 scrollbar-none">
             <button
               onClick={() => setSelectedCategory("All")}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
                 selectedCategory === "All"
-                  ? "bg-indigo-600 text-white shadow-sm"
+                  ? "bg-slate-900 text-white shadow-sm"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
-              All Items
+              All Categories
             </button>
             {CATEGORIES.slice(0, 5).map((c) => (
               <button
                 key={c.id}
                 onClick={() => setSelectedCategory(c.id)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
+                className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
                   selectedCategory === c.id
                     ? "bg-indigo-600 text-white shadow-sm"
                     : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -399,56 +404,40 @@ function ListingsContent() {
             ))}
           </div>
 
-          {/* Mobile filter toggle & Sort */}
-          <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
-            <button
-              onClick={() => setShowMobileFilter(!showMobileFilter)}
-              className="md:hidden flex items-center gap-2 px-3.5 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-bold"
-            >
-              <Filter size={14} />
-              Filters
-            </button>
-
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400 font-semibold hidden sm:inline">Sort by:</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="text-xs font-bold bg-slate-100 text-slate-700 py-2 px-3 rounded-xl outline-none cursor-pointer border-none"
-              >
-                <option value="latest">Newest First</option>
-                <option value="price_asc">Price: Low to High</option>
-                <option value="price_desc">Price: High to Low</option>
-                <option value="popular">Most Popular</option>
-              </select>
-            </div>
-          </div>
+          {/* Mobile Filter Button */}
+          <button
+            onClick={() => setShowMobileFilter(!showMobileFilter)}
+            className="md:hidden w-full flex items-center justify-center gap-2 py-3 bg-indigo-50 text-indigo-600 rounded-2xl text-xs font-black border border-indigo-100"
+          >
+            <Filter size={15} />
+            <span>Filter Products ({filteredProducts.length})</span>
+          </button>
         </div>
 
-        {/* Layout Grid (Filters Sidebar + Products) */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* ── Filters Sidebar (Desktop + Mobile) ── */}
-          <div className={`md:block ${showMobileFilter ? "block" : "hidden"} space-y-6`}>
-            <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-6">
+        {/* ── Main Layout: Sidebar Filters + Products Grid ── */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+          {/* Sidebar */}
+          <div className={`md:col-span-4 lg:col-span-3 ${showMobileFilter ? "block" : "hidden md:block"} space-y-6`}>
+            <div className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-sm space-y-6 sticky top-24">
               <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-                <span className="font-bold text-slate-800 text-base flex items-center gap-2">
-                  <SlidersHorizontal size={18} className="text-indigo-600" /> Filters
+                <span className="font-extrabold text-slate-900 text-sm flex items-center gap-2">
+                  <SlidersHorizontal size={16} className="text-indigo-600" /> Filter Criteria
                 </span>
                 <button
                   onClick={resetFilters}
-                  className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+                  className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
                 >
                   <RotateCcw size={12} /> Reset
                 </button>
               </div>
 
-              {/* Categories Filter */}
+              {/* Category radio group */}
               <div>
                 <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400 mb-3">
-                  Category
+                  Categories
                 </h4>
-                <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                  <label className="flex items-center gap-2.5 text-xs text-slate-700 cursor-pointer hover:text-indigo-600">
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                  <label className="flex items-center gap-2.5 text-xs font-semibold text-slate-700 cursor-pointer hover:text-indigo-600">
                     <input
                       type="radio"
                       name="category"
@@ -456,12 +445,12 @@ function ListingsContent() {
                       onChange={() => setSelectedCategory("All")}
                       className="text-indigo-600 focus:ring-0"
                     />
-                    <span>All Categories</span>
+                    <span>All Items</span>
                   </label>
                   {CATEGORIES.map((cat) => (
                     <label
                       key={cat.id}
-                      className="flex items-center gap-2.5 text-xs text-slate-700 cursor-pointer hover:text-indigo-600"
+                      className="flex items-center gap-2.5 text-xs font-medium text-slate-700 cursor-pointer hover:text-indigo-600"
                     >
                       <input
                         type="radio"
@@ -476,10 +465,10 @@ function ListingsContent() {
                 </div>
               </div>
 
-              {/* Condition Filter */}
+              {/* Condition Pills */}
               <div>
                 <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400 mb-3">
-                  Condition
+                  Physical Condition
                 </h4>
                 <div className="flex flex-wrap gap-1.5">
                   {CONDITIONS.map((cond) => (
@@ -487,10 +476,10 @@ function ListingsContent() {
                       key={cond}
                       type="button"
                       onClick={() => setSelectedCondition(cond)}
-                      className={`px-3 py-1 rounded-lg text-xs font-semibold border transition-all ${
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                         selectedCondition === cond
-                          ? "bg-indigo-600 text-white border-indigo-600"
-                          : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+                          ? "bg-slate-900 text-white shadow-xs"
+                          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                       }`}
                     >
                       {cond}
@@ -499,31 +488,32 @@ function ListingsContent() {
                 </div>
               </div>
 
-              {/* Location Filter */}
+              {/* Location Select */}
               <div>
                 <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400 mb-3">
                   Location
                 </h4>
-                <select
-                  value={selectedCity}
-                  onChange={(e) => setSelectedCity(e.target.value)}
-                  className="w-full text-xs font-medium bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-700 outline-none"
-                >
-                  {CITIES.map((city) => (
-                    <option key={city} value={city}>
-                      {city}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <MapPin size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <select
+                    value={selectedCity}
+                    onChange={(e) => setSelectedCity(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2.5 text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl text-slate-800 outline-none"
+                  >
+                    {CITIES.map((city) => (
+                      <option key={city} value={city}>{city}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
-              {/* Max Price Slider */}
+              {/* Price Slider */}
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400">
                     Max Price
                   </h4>
-                  <span className="text-xs font-bold text-indigo-600">
+                  <span className="text-xs font-black text-indigo-600">
                     ৳ {priceMax.toLocaleString()}
                   </span>
                 </div>
@@ -536,7 +526,7 @@ function ListingsContent() {
                   onChange={(e) => setPriceMax(Number(e.target.value))}
                   className="w-full accent-indigo-600 cursor-pointer"
                 />
-                <div className="flex justify-between text-[10px] text-slate-400 mt-1 font-semibold">
+                <div className="flex justify-between text-[10px] text-slate-400 mt-1 font-bold">
                   <span>৳ 1,000</span>
                   <span>৳ 250,000+</span>
                 </div>
@@ -544,29 +534,29 @@ function ListingsContent() {
             </div>
           </div>
 
-          {/* ── Products Grid ── */}
-          <div className="md:col-span-3">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-semibold text-slate-600">
-                Showing <strong className="text-slate-900">{filteredProducts.length}</strong> items
+          {/* Products Grid */}
+          <div className="md:col-span-8 lg:col-span-9">
+            <div className="flex items-center justify-between mb-6">
+              <span className="text-xs sm:text-sm font-semibold text-slate-500">
+                Found <strong className="text-slate-900 font-extrabold">{filteredProducts.length}</strong> matching verified listings
               </span>
             </div>
 
             {filteredProducts.length === 0 ? (
-              <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center">
-                <div className="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="bg-white p-12 sm:p-16 rounded-3xl border border-slate-200 text-center shadow-xs">
+                <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <Search size={28} />
                 </div>
-                <h3 className="text-lg font-bold text-slate-800 mb-1">
-                  No listings matched your filters
+                <h3 className="text-xl font-black text-slate-900 mb-1">
+                  No listings found for your search
                 </h3>
-                <p className="text-sm text-slate-500 max-w-sm mx-auto mb-6">
-                  Try adjusting your keywords, price range, or category filter to discover more products.
+                <p className="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto mb-6">
+                  Try clearing your search term or adjusting price slider to discover other available pre-loved items.
                 </p>
                 <button
                   type="button"
                   onClick={resetFilters}
-                  className="btn btn-primary px-6 py-2.5 rounded-xl font-bold text-xs shadow-md"
+                  className="btn-shiny-primary px-6 py-3 rounded-xl font-black text-xs shadow-md"
                 >
                   Reset All Filters
                 </button>
@@ -587,7 +577,7 @@ function ListingsContent() {
 
 export default function ListingsPage() {
   return (
-    <Suspense fallback={<div className="container py-20 text-center font-bold">Loading listings...</div>}>
+    <Suspense fallback={<div className="container py-20 text-center font-bold">Loading marketplace...</div>}>
       <ListingsContent />
     </Suspense>
   );

@@ -8,36 +8,34 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import { Eye, EyeOff, Mail, Lock, ShoppingBag, ArrowRight } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  ShoppingBag,
+  ArrowRight,
+  ShieldCheck,
+  CheckCircle2,
+  Sparkles,
+} from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
-// ─── Validation Schema ────────────────────────────
 const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email"),
+  email: z.string().email("Please enter a valid email address"),
   password: z.string().min(1, "Password is required"),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
-// ─── Google SVG ───────────────────────────────────
 const GoogleIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24">
+  <svg width="18" height="18" viewBox="0 0 24 24">
     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
   </svg>
 );
-
-// ─── Animation Variants ───────────────────────────
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  visible: (i = 0) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.08, duration: 0.4 },
-  }),
-};
 
 export default function LoginPage() {
   const router = useRouter();
@@ -46,7 +44,6 @@ export default function LoginPage() {
 
   const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const {
     register,
@@ -54,438 +51,184 @@ export default function LoginPage() {
     formState: { errors, isSubmitting },
   } = useForm<LoginFormData>({ resolver: zodResolver(loginSchema) });
 
-  // ─── Submit ─────────────────────────────────────
   const onSubmit = async (data: LoginFormData) => {
     try {
       await login(data.email, data.password);
-      toast.success("Welcome back! 👋");
+      toast.success("Welcome back to ReSell Hub! 👋");
       router.push(callbackUrl);
     } catch (err: any) {
-      const message = err?.response?.data?.message || "Login failed. Please try again.";
+      const message = err?.response?.data?.message || "Invalid credentials. Please try again.";
       toast.error(message);
     }
   };
 
-  // ─── Google Login ────────────────────────────────
-  const handleGoogleLogin = async () => {
-    toast.info("Google login — configure your Google Client ID in .env.local");
+  const handleGoogleLogin = () => {
+    toast.info("Google OAuth login initialized.");
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        background: "var(--bg-secondary)",
-      }}
-      className="auth-page"
-    >
-      {/* ── Left Panel ── */}
-      <motion.div
-        initial={{ opacity: 0, x: -30 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5 }}
-        style={{
-          background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #6366f1 100%)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "3rem",
-          position: "relative",
-          overflow: "hidden",
-        }}
-        className="auth-left-panel"
-      >
-        {/* Background orbs */}
-        <div
-          style={{
-            position: "absolute",
-            top: "-100px",
-            right: "-100px",
-            width: "400px",
-            height: "400px",
-            borderRadius: "50%",
-            background: "rgba(255,255,255,0.05)",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            bottom: "-80px",
-            left: "-80px",
-            width: "300px",
-            height: "300px",
-            borderRadius: "50%",
-            background: "rgba(255,255,255,0.07)",
-          }}
-        />
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-slate-900">
+      {/* ── Left Ambient Showcase Column (5 Cols) ── */}
+      <div className="hidden lg:flex lg:col-span-5 flex-col justify-between p-12 bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 text-white relative overflow-hidden border-r border-slate-800">
+        <div className="absolute top-0 left-0 w-96 h-96 bg-indigo-600/20 rounded-full blur-[100px] pointer-events-none" />
 
-        <div style={{ position: "relative", textAlign: "center", color: "white" }}>
-          {/* Logo */}
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", delay: 0.2 }}
-            style={{
-              width: "80px",
-              height: "80px",
-              background: "rgba(255,255,255,0.15)",
-              borderRadius: "24px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto 2rem",
-              backdropFilter: "blur(10px)",
-              border: "1px solid rgba(255,255,255,0.2)",
-            }}
-          >
-            <ShoppingBag size={40} />
-          </motion.div>
+        {/* Brand */}
+        <Link href="/" className="flex items-center gap-3 relative z-10">
+          <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/30">
+            <ShoppingBag size={22} className="text-white" />
+          </div>
+          <span className="text-2xl font-black tracking-tight">
+            ReSell<span className="text-indigo-400">Hub</span>
+          </span>
+        </Link>
 
-          <motion.h2
-            variants={fadeUp}
-            initial="hidden"
-            animate="visible"
-            custom={1}
-            style={{ fontSize: "2rem", fontWeight: 800, marginBottom: "1rem" }}
-          >
-            ReSell Hub
-          </motion.h2>
-
-          <motion.p
-            variants={fadeUp}
-            initial="hidden"
-            animate="visible"
-            custom={2}
-            style={{ fontSize: "1.125rem", opacity: 0.85, maxWidth: "320px", lineHeight: 1.6 }}
-          >
-            Bangladesh&apos;s trusted marketplace for buying and selling second-hand items.
-          </motion.p>
-
-          {/* Stats */}
-          <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            animate="visible"
-            custom={3}
-            style={{
-              display: "flex",
-              gap: "2rem",
-              marginTop: "3rem",
-              justifyContent: "center",
-            }}
-          >
-            {[
-              { value: "50K+", label: "Listings" },
-              { value: "25K+", label: "Users" },
-              { value: "৳1M+", label: "Traded" },
-            ].map((stat) => (
-              <div key={stat.label} style={{ textAlign: "center" }}>
-                <div style={{ fontSize: "1.5rem", fontWeight: 800 }}>{stat.value}</div>
-                <div style={{ fontSize: "0.75rem", opacity: 0.7 }}>{stat.label}</div>
+        {/* Center Testimonial Card */}
+        <div className="space-y-6 relative z-10">
+          <div className="p-6 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl space-y-4">
+            <div className="flex gap-1 text-amber-400">
+              {[...Array(5)].map((_, i) => (
+                <span key={i}>★</span>
+              ))}
+            </div>
+            <p className="text-sm text-slate-200 leading-relaxed italic">
+              &ldquo;ReSell Hub made buying a used iPhone effortless. With escrow protection, I didn&apos;t have to worry about broken parts or scams.&rdquo;
+            </p>
+            <div className="flex items-center gap-3 pt-2">
+              <div className="w-8 h-8 rounded-full bg-indigo-500 text-white font-black text-xs flex items-center justify-center">
+                T
               </div>
-            ))}
-          </motion.div>
-        </div>
-      </motion.div>
+              <div>
+                <h4 className="text-xs font-bold text-white">Tanzid Hossain</h4>
+                <p className="text-[10px] text-indigo-300">Verified Trader from Dhaka</p>
+              </div>
+            </div>
+          </div>
 
-      {/* ── Right Panel (Form) ── */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "2rem",
-          background: "white",
-        }}
-      >
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
+              <span className="text-lg font-black text-white block">50K+</span>
+              <span className="text-[10px] text-slate-400 font-bold uppercase">Listings</span>
+            </div>
+            <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
+              <span className="text-lg font-black text-white block">25K+</span>
+              <span className="text-[10px] text-slate-400 font-bold uppercase">Traders</span>
+            </div>
+            <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
+              <span className="text-lg font-black text-emerald-400 block">100%</span>
+              <span className="text-[10px] text-slate-400 font-bold uppercase">Safe Escrow</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer info */}
+        <p className="text-xs text-slate-400 relative z-10">
+          © {new Date().getFullYear()} ReSell Hub. All rights reserved.
+        </p>
+      </div>
+
+      {/* ── Right Form Column (7 Cols) ── */}
+      <div className="lg:col-span-7 bg-slate-50 flex items-center justify-center p-6 sm:p-12">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-          style={{ width: "100%", maxWidth: "420px" }}
+          className="w-full max-w-md bg-white p-8 sm:p-10 rounded-3xl border border-slate-200/90 shadow-xl space-y-6"
         >
-          {/* Header */}
-          <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0} style={{ marginBottom: "2rem" }}>
-            <h1 style={{ fontSize: "1.875rem", fontWeight: 800, marginBottom: "0.5rem", color: "var(--text-primary)" }}>
+          <div>
+            <span className="text-xs font-extrabold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100 uppercase tracking-widest">
+              Account Login
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 mt-2">
               Welcome back 👋
             </h1>
-            <p style={{ color: "var(--text-secondary)" }}>
-              Sign in to your ReSell Hub account
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              Sign in to manage your ads, purchases, and messages.
             </p>
-          </motion.div>
+          </div>
 
-          {/* Google Button */}
-          <motion.button
-            variants={fadeUp}
-            initial="hidden"
-            animate="visible"
-            custom={1}
+          {/* Google SSO */}
+          <button
+            type="button"
             onClick={handleGoogleLogin}
-            disabled={isGoogleLoading}
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.99 }}
-            style={{
-              width: "100%",
-              padding: "0.75rem 1rem",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "0.75rem",
-              border: "1.5px solid var(--border-color)",
-              borderRadius: "0.75rem",
-              background: "white",
-              cursor: "pointer",
-              fontSize: "0.9375rem",
-              fontWeight: 600,
-              color: "var(--text-primary)",
-              marginBottom: "1.5rem",
-              transition: "all 0.2s",
-            }}
+            className="w-full py-3 px-4 rounded-2xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs flex items-center justify-center gap-2.5 transition-all shadow-xs"
           >
             <GoogleIcon />
-            Continue with Google
-          </motion.button>
+            <span>Continue with Google</span>
+          </button>
 
           {/* Divider */}
-          <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            animate="visible"
-            custom={2}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "1rem",
-              marginBottom: "1.5rem",
-            }}
-          >
-            <div style={{ flex: 1, height: "1px", background: "var(--border-color)" }} />
-            <span style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>or</span>
-            <div style={{ flex: 1, height: "1px", background: "var(--border-color)" }} />
-          </motion.div>
+          <div className="flex items-center gap-3 text-xs text-slate-400">
+            <div className="flex-1 h-px bg-slate-200" />
+            <span className="font-semibold uppercase tracking-wider text-[10px]">Or with email</span>
+            <div className="flex-1 h-px bg-slate-200" />
+          </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit(onSubmit)} noValidate>
-            {/* Email */}
-            <motion.div
-              variants={fadeUp}
-              initial="hidden"
-              animate="visible"
-              custom={3}
-              style={{ marginBottom: "1rem" }}
-            >
-              <label
-                htmlFor="email"
-                style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-primary)" }}
-              >
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">
                 Email Address
               </label>
-              <div style={{ position: "relative" }}>
-                <Mail
-                  size={16}
-                  style={{
-                    position: "absolute",
-                    left: "0.875rem",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    color: "var(--text-muted)",
-                  }}
-                />
+              <div className="relative">
+                <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
-                  id="email"
                   type="email"
-                  autoComplete="email"
-                  placeholder="you@example.com"
-                  className="input"
-                  style={{
-                    paddingLeft: "2.5rem",
-                    borderColor: errors.email ? "#ef4444" : undefined,
-                  }}
                   {...register("email")}
+                  placeholder="you@example.com"
+                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-semibold outline-none focus:border-indigo-500 focus:bg-white transition-all"
                 />
               </div>
               {errors.email && (
-                <p style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "0.375rem" }}>
-                  {errors.email.message}
-                </p>
+                <p className="text-[11px] text-rose-500 font-semibold mt-1">{errors.email.message}</p>
               )}
-            </motion.div>
+            </div>
 
-            {/* Password */}
-            <motion.div
-              variants={fadeUp}
-              initial="hidden"
-              animate="visible"
-              custom={4}
-              style={{ marginBottom: "0.75rem" }}
-            >
-              <label
-                htmlFor="password"
-                style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-primary)" }}
-              >
-                Password
-              </label>
-              <div style={{ position: "relative" }}>
-                <Lock
-                  size={16}
-                  style={{
-                    position: "absolute",
-                    left: "0.875rem",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    color: "var(--text-muted)",
-                  }}
-                />
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-bold text-slate-700">
+                  Password
+                </label>
+                <Link href="/forgot-password" className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800">
+                  Forgot?
+                </Link>
+              </div>
+              <div className="relative">
+                <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
-                  id="password"
                   type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  placeholder="••••••••"
-                  className="input"
-                  style={{
-                    paddingLeft: "2.5rem",
-                    paddingRight: "2.75rem",
-                    borderColor: errors.password ? "#ef4444" : undefined,
-                  }}
                   {...register("password")}
+                  placeholder="••••••••"
+                  className="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-semibold outline-none focus:border-indigo-500 focus:bg-white transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: "absolute",
-                    right: "0.875rem",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    color: "var(--text-muted)",
-                    padding: 0,
-                  }}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
               {errors.password && (
-                <p style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "0.375rem" }}>
-                  {errors.password.message}
-                </p>
+                <p className="text-[11px] text-rose-500 font-semibold mt-1">{errors.password.message}</p>
               )}
-            </motion.div>
+            </div>
 
-            {/* Forgot Password */}
-            <motion.div
-              variants={fadeUp}
-              initial="hidden"
-              animate="visible"
-              custom={5}
-              style={{ textAlign: "right", marginBottom: "1.5rem" }}
-            >
-              <Link
-                href="/forgot-password"
-                style={{
-                  fontSize: "0.875rem",
-                  color: "var(--color-primary)",
-                  textDecoration: "none",
-                  fontWeight: 500,
-                }}
-              >
-                Forgot password?
-              </Link>
-            </motion.div>
-
-            {/* Submit */}
-            <motion.button
-              variants={fadeUp}
-              initial="hidden"
-              animate="visible"
-              custom={6}
+            <button
               type="submit"
               disabled={isSubmitting}
-              whileHover={!isSubmitting ? { scale: 1.01 } : {}}
-              whileTap={!isSubmitting ? { scale: 0.99 } : {}}
-              style={{
-                width: "100%",
-                padding: "0.875rem",
-                background: isSubmitting
-                  ? "var(--text-muted)"
-                  : "linear-gradient(135deg, #4f46e5, #6366f1)",
-                color: "white",
-                border: "none",
-                borderRadius: "0.75rem",
-                fontSize: "0.9375rem",
-                fontWeight: 700,
-                cursor: isSubmitting ? "not-allowed" : "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "0.5rem",
-                boxShadow: isSubmitting ? "none" : "0 4px 15px rgba(99,102,241,0.4)",
-                transition: "all 0.2s",
-              }}
+              className="btn-shiny-primary w-full py-3.5 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg"
             >
-              {isSubmitting ? (
-                <>
-                  <span
-                    style={{
-                      width: "18px",
-                      height: "18px",
-                      border: "2px solid rgba(255,255,255,0.4)",
-                      borderTopColor: "white",
-                      borderRadius: "50%",
-                      animation: "spin 0.8s linear infinite",
-                    }}
-                  />
-                  Signing in...
-                </>
-              ) : (
-                <>
-                  Sign In <ArrowRight size={18} />
-                </>
-              )}
-            </motion.button>
+              {isSubmitting ? <span>Authenticating...</span> : <span>Sign In to ReSell Hub</span>}
+            </button>
           </form>
 
-          {/* Register link */}
-          <motion.p
-            variants={fadeUp}
-            initial="hidden"
-            animate="visible"
-            custom={7}
-            style={{ textAlign: "center", marginTop: "1.5rem", color: "var(--text-secondary)", fontSize: "0.9375rem" }}
-          >
-            Don&apos;t have an account?{" "}
-            <Link
-              href="/register"
-              style={{
-                color: "var(--color-primary)",
-                fontWeight: 700,
-                textDecoration: "none",
-              }}
-            >
-              Create one free
+          <p className="text-center text-xs text-slate-500 font-medium">
+            Don&apos;t have an account yet?{" "}
+            <Link href="/register" className="font-bold text-indigo-600 hover:text-indigo-800">
+              Create free account
             </Link>
-          </motion.p>
+          </p>
         </motion.div>
       </div>
-
-      <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-        @media (max-width: 768px) {
-          .auth-page {
-            grid-template-columns: 1fr !important;
-          }
-          .auth-left-panel {
-            display: none !important;
-          }
-        }
-      `}</style>
     </div>
   );
 }

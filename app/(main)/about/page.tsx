@@ -12,110 +12,128 @@ import {
   Sparkles,
   Award,
   ArrowRight,
+  Globe2,
+  CheckCircle2,
+  Lock,
 } from "lucide-react";
 
 export default function AboutPage() {
   return (
     <div className="bg-slate-50 min-h-screen">
-      {/* Hero Banner */}
-      <section className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white py-20 lg:py-24 text-center">
-        <div className="container mx-auto px-4 max-w-3xl">
-          <span className="text-xs font-bold text-indigo-300 uppercase tracking-widest bg-white/10 px-3.5 py-1.5 rounded-full border border-white/15 backdrop-blur-md">
-            Our Story & Mission
+      {/* ── HERO BANNER WITH AMBIENT DARK BACKDROP ── */}
+      <section className="relative py-20 lg:py-28 overflow-hidden bg-[#090D16] text-white text-center">
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-indigo-600/25 rounded-full blur-[120px] pointer-events-none" />
+
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 relative z-10">
+          <span className="text-xs font-black uppercase tracking-widest text-indigo-300 bg-white/10 px-4 py-1.5 rounded-full border border-white/15 backdrop-blur-xl">
+            Our Mission & Impact
           </span>
-          <h1 className="text-3xl sm:text-5xl font-black mt-4 mb-6 tracking-tight leading-tight">
-            Building Bangladesh&apos;s Most Trusted{" "}
-            <span className="bg-gradient-to-r from-indigo-400 via-purple-300 to-amber-300 bg-clip-text text-transparent">
-              Recommerce Ecosystem
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black mt-6 mb-6 tracking-tight leading-[1.12]">
+            Democratizing Circular Recommerce in{" "}
+            <span className="bg-gradient-to-r from-indigo-400 via-purple-300 to-cyan-300 bg-clip-text text-transparent">
+              Bangladesh
             </span>
           </h1>
-          <p className="text-slate-300 text-base sm:text-lg leading-relaxed">
-            ReSell Hub was founded with a singular purpose: to make buying and selling used goods safe, transparent, and effortlessly accessible to everyone across Bangladesh.
+          <p className="text-slate-300 text-sm sm:text-lg leading-relaxed max-w-2xl mx-auto font-normal">
+            We are building a world where extending the life of gadgets, furniture, and vehicles is transparent, rewarding, and 100% scam-free.
           </p>
         </div>
       </section>
 
-      {/* Stats Counter */}
-      <section className="bg-white py-10 border-b border-slate-200 shadow-sm">
-        <div className="container mx-auto px-4">
+      {/* ── STATS COUNTER BAR ── */}
+      <section className="bg-white py-10 border-b border-slate-200 shadow-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-            <div>
-              <div className="text-3xl sm:text-4xl font-black text-indigo-600">2024</div>
-              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Founded in Dhaka</div>
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+              <div className="text-3xl sm:text-4xl font-black text-slate-900">2024</div>
+              <div className="text-xs font-extrabold text-indigo-600 uppercase tracking-wider mt-1">Founded in Dhaka</div>
             </div>
-            <div>
-              <div className="text-3xl sm:text-4xl font-black text-indigo-600">25,000+</div>
-              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Registered Members</div>
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+              <div className="text-3xl sm:text-4xl font-black text-slate-900">25,000+</div>
+              <div className="text-xs font-extrabold text-indigo-600 uppercase tracking-wider mt-1">Verified Members</div>
             </div>
-            <div>
-              <div className="text-3xl sm:text-4xl font-black text-indigo-600">64</div>
-              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Districts Connected</div>
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+              <div className="text-3xl sm:text-4xl font-black text-slate-900">64</div>
+              <div className="text-xs font-extrabold text-indigo-600 uppercase tracking-wider mt-1">Districts Connected</div>
             </div>
-            <div>
-              <div className="text-3xl sm:text-4xl font-black text-indigo-600">120+ Tons</div>
-              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">E-Waste Prevented</div>
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+              <div className="text-3xl sm:text-4xl font-black text-slate-900">120+ Tons</div>
+              <div className="text-xs font-extrabold text-emerald-600 uppercase tracking-wider mt-1">E-Waste Prevented</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Mission & Vision */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
-            <div className="space-y-5">
-              <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
-                Why We Exist
+      {/* ── CORE PILLARS ── */}
+      <section className="py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6">
+              <span className="text-xs font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3.5 py-1.5 rounded-full border border-indigo-100">
+                The ReSell Hub Difference
               </span>
-              <h2 className="text-3xl font-black text-slate-900 leading-tight">
-                Empowering circular commerce with verified trust & safety
+              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 leading-tight">
+                Why thousands of smart traders choose our platform
               </h2>
-              <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-                Traditional classified boards in Bangladesh are plagued by scammers, fake products, and high-risk meetups. ReSell Hub changes that by introducing identity verification, escrow payment protection, and structured product condition metrics.
+              <p className="text-slate-600 text-sm sm:text-base leading-relaxed font-normal">
+                Traditional classifieds in Bangladesh are rife with fake notes, stolen electronics, and sudden cancellations. We created ReSell Hub to introduce bank-grade escrow security, transparent hardware diagnostics, and community verification.
               </p>
-              <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-                Whether you&apos;re a student looking for an affordable laptop, a photographer upgrading camera bodies, or a family decluttering furniture, we provide a smooth, community-first marketplace.
-              </p>
+              <div className="space-y-3 pt-2">
+                {[
+                  "100% Escrow Protection on online payments",
+                  "Identity verification with National ID & phone OTP",
+                  "Standardized physical condition checklist (1-5 score)",
+                  "Verified buyer & seller dispute resolution team",
+                ].map((point) => (
+                  <div key={point} className="flex items-center gap-3 text-xs sm:text-sm font-bold text-slate-800">
+                    <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                      <CheckCircle2 size={13} />
+                    </span>
+                    <span>{point}</span>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
-                  <ShieldCheck size={22} />
+            {/* 4 Feature Grid Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-sm space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black">
+                  <ShieldCheck size={24} />
                 </div>
-                <h3 className="font-bold text-slate-900 text-base">Escrow Safety</h3>
+                <h3 className="font-black text-slate-900 text-base">Escrow Shield</h3>
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  Money is protected until both buyer and seller verify the condition.
+                  Money is protected until both parties verify product hardware in person.
                 </p>
               </div>
 
-              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
-                  <Leaf size={22} />
+              <div className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-sm space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black">
+                  <Leaf size={24} />
                 </div>
-                <h3 className="font-bold text-slate-900 text-base">Eco Impact</h3>
+                <h3 className="font-black text-slate-900 text-base">Sustainability</h3>
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  Giving electronics and gear a second life reduces carbon footprint.
+                  Every second-hand trade extends product life and curtails toxic landfill waste.
                 </p>
               </div>
 
-              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
-                  <HeartHandshake size={22} />
+              <div className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-sm space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-black">
+                  <HeartHandshake size={24} />
                 </div>
-                <h3 className="font-bold text-slate-900 text-base">Community Trust</h3>
+                <h3 className="font-black text-slate-900 text-base">Verified Trust</h3>
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  Transparent user feedback, ratings, and active trade history.
+                  Real feedback, verified transaction histories, and community ratings.
                 </p>
               </div>
 
-              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
-                  <Zap size={22} />
+              <div className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-sm space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center font-black">
+                  <Zap size={24} />
                 </div>
-                <h3 className="font-bold text-slate-900 text-base">Instant Deal Flow</h3>
+                <h3 className="font-black text-slate-900 text-base">Fast Liquidity</h3>
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  Instant messaging, smart search, and direct seller negotiation.
+                  Average listing sells within 48 hours to thousands of ready buyers.
                 </p>
               </div>
             </div>
@@ -123,32 +141,32 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Leadership & Engineering Team */}
-      <section className="py-16 bg-white border-t border-slate-200">
-        <div className="container mx-auto px-4">
-          <div className="text-center max-w-xl mx-auto mb-12">
-            <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
-              The Builders
+      {/* ── ENGINEERING & LEADERSHIP TEAM ── */}
+      <section className="py-20 bg-white border-t border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-xl mx-auto mb-16">
+            <span className="text-xs font-black uppercase tracking-widest text-indigo-600 bg-indigo-50 px-3.5 py-1.5 rounded-full border border-indigo-100">
+              The Creators
             </span>
-            <h2 className="text-3xl font-black text-slate-900 mt-2">
-              Meet the Engineering Team
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mt-2 tracking-tight">
+              Meet the Core Team
             </h2>
-            <p className="text-slate-500 text-sm mt-1">
-              Crafted by passionate engineers dedicated to exceptional user experience.
+            <p className="text-slate-500 text-xs sm:text-sm mt-1">
+              Engineered with world-class standard by developers from Bangladesh.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {[
               {
                 name: "Mahfuzul Haque",
                 role: "Founder & Full Stack Lead",
                 img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80",
-                bio: "Full stack engineer specializing in Next.js, Node.js, and high-concurrency marketplace platforms.",
+                bio: "Full stack engineer architecting scalable marketplace infrastructures with Next.js, Node, and MongoDB.",
               },
               {
                 name: "Tanvir Ahmed",
-                role: "Lead Product Designer",
+                role: "Lead UI/UX Designer",
                 img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80",
                 bio: "Obsessed with micro-interactions, responsive design systems, and delightful customer journeys.",
               },
@@ -159,34 +177,18 @@ export default function AboutPage() {
                 bio: "Dedicated to user identity verification, dispute resolution, and community protection.",
               },
             ].map((member) => (
-              <div key={member.name} className="bg-slate-50 rounded-2xl p-6 border border-slate-200/80 text-center space-y-3">
-                <div className="w-20 h-20 rounded-full mx-auto overflow-hidden border-2 border-indigo-500 shadow-md">
+              <div key={member.name} className="bg-slate-50 rounded-3xl p-7 border border-slate-200/90 text-center space-y-4 shadow-xs">
+                <div className="w-24 h-24 rounded-2xl mx-auto overflow-hidden border-2 border-indigo-500 shadow-md">
                   <img src={member.img} alt={member.name} className="w-full h-full object-cover" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-slate-900 text-base">{member.name}</h4>
-                  <span className="text-xs font-semibold text-indigo-600">{member.role}</span>
+                  <h4 className="font-black text-slate-900 text-base">{member.name}</h4>
+                  <span className="text-xs font-bold text-indigo-600">{member.role}</span>
                 </div>
-                <p className="text-xs text-slate-500 leading-relaxed">{member.bio}</p>
+                <p className="text-xs text-slate-500 leading-relaxed font-normal">{member.bio}</p>
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-16 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-center">
-        <div className="container mx-auto px-4 max-w-xl">
-          <h2 className="text-3xl font-extrabold mb-4">Be part of the recommerce movement</h2>
-          <p className="text-indigo-100 text-sm mb-6">
-            Join thousands of smart shoppers and sellers saving money and making Bangladesh greener.
-          </p>
-          <Link
-            href="/register"
-            className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-indigo-600 font-bold rounded-xl shadow-xl hover:bg-slate-100 transition-all"
-          >
-            Create Your Account Today <ArrowRight size={18} />
-          </Link>
         </div>
       </section>
     </div>

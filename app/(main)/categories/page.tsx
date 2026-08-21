@@ -17,6 +17,7 @@ import {
   Sparkles,
   Search,
   ArrowRight,
+  TrendingUp,
 } from "lucide-react";
 import { CATEGORIES } from "@/lib/constants";
 
@@ -26,8 +27,8 @@ const FULL_CATEGORIES = [
     name: "Electronics & Gadgets",
     icon: Laptop,
     description: "Smartphones, Laptops, Tablets, Cameras, Accessories, TVs & Smart Home",
-    count: "14,800+ items",
-    bg: "from-blue-500 to-indigo-600",
+    count: "14,800+ Deals",
+    gradient: "from-blue-600 via-indigo-600 to-cyan-500",
     subcategories: ["Smartphones", "Laptops & Desktops", "Audio & Headphones", "Cameras", "Accessories", "Gaming Consoles"],
   },
   {
@@ -35,8 +36,8 @@ const FULL_CATEGORIES = [
     name: "Fashion & Apparel",
     icon: Shirt,
     description: "Men's, Women's, Kids' clothing, Shoes, Bags, Watches & Fashion Accessories",
-    count: "9,200+ items",
-    bg: "from-purple-500 to-pink-600",
+    count: "9,200+ Deals",
+    gradient: "from-purple-600 via-pink-600 to-rose-500",
     subcategories: ["Men's Wear", "Women's Ethnic & Western", "Footwear", "Watches & Jewelry", "Bags & Luggage"],
   },
   {
@@ -44,8 +45,8 @@ const FULL_CATEGORIES = [
     name: "Home & Furniture",
     icon: Armchair,
     description: "Sofas, Desks, Beds, Dining Tables, Office Chairs, Lighting & Decor",
-    count: "4,600+ items",
-    bg: "from-amber-500 to-orange-600",
+    count: "4,600+ Deals",
+    gradient: "from-amber-500 via-orange-600 to-yellow-500",
     subcategories: ["Living Room", "Bedroom", "Office Furniture", "Home Decor", "Kitchen Appliances"],
   },
   {
@@ -53,17 +54,17 @@ const FULL_CATEGORIES = [
     name: "Vehicles & Motors",
     icon: Bike,
     description: "Motorcycles, Scooters, Bicycles, Cars, Spare Parts & Helmets",
-    count: "2,100+ items",
-    bg: "from-red-500 to-rose-600",
+    count: "2,100+ Deals",
+    gradient: "from-rose-600 via-red-600 to-orange-500",
     subcategories: ["Motorbikes & Scooters", "Bicycles", "Cars & Sedans", "Helmets & Riding Gear", "Auto Parts"],
   },
   {
     id: "Books",
-    name: "Books & Learning",
+    name: "Books & Study Material",
     icon: BookOpen,
     description: "Textbooks, Novels, BCS & Admission prep, Non-fiction & Comics",
-    count: "3,800+ items",
-    bg: "from-emerald-500 to-teal-600",
+    count: "3,800+ Deals",
+    gradient: "from-emerald-600 via-teal-600 to-cyan-600",
     subcategories: ["University & Academic", "Fiction & Novels", "Competitive Exams", "Children's Books"],
   },
   {
@@ -71,8 +72,8 @@ const FULL_CATEGORIES = [
     name: "Musical Instruments",
     icon: Music,
     description: "Acoustic & Electric Guitars, Keyboards, Drums, Violins, Microphones & Amps",
-    count: "1,150+ items",
-    bg: "from-indigo-500 to-violet-600",
+    count: "1,150+ Deals",
+    gradient: "from-indigo-600 via-violet-600 to-purple-600",
     subcategories: ["Guitars & Bass", "Keyboards & Pianos", "Drums & Percussion", "Audio Interface & Studio Gear"],
   },
   {
@@ -80,8 +81,8 @@ const FULL_CATEGORIES = [
     name: "Sports & Fitness",
     icon: Dumbbell,
     description: "Gym Equipment, Dumbbells, Cricket Bats, Football Kits & Outdoor Gear",
-    count: "1,400+ items",
-    bg: "from-cyan-500 to-blue-600",
+    count: "1,400+ Deals",
+    gradient: "from-cyan-600 via-blue-600 to-indigo-600",
     subcategories: ["Gym & Weights", "Cricket & Football", "Badminton & Tennis", "Outdoor & Camping"],
   },
   {
@@ -89,8 +90,8 @@ const FULL_CATEGORIES = [
     name: "Toys, Kids & Baby",
     icon: Baby,
     description: "Prams, Strollers, Educational Toys, Action Figures, Board Games",
-    count: "950+ items",
-    bg: "from-yellow-400 to-amber-500",
+    count: "950+ Deals",
+    gradient: "from-yellow-500 via-amber-600 to-orange-500",
     subcategories: ["Baby Gear & Strollers", "Educational Toys", "Action Figures", "Board Games"],
   },
 ];
@@ -105,17 +106,17 @@ export default function CategoriesPage() {
 
   return (
     <div className="bg-slate-50 min-h-screen py-12">
-      <div className="container mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3.5 py-1.5 rounded-full border border-indigo-100">
-            Marketplace Directory
+        <div className="text-center max-w-2xl mx-auto mb-16">
+          <span className="text-xs font-black uppercase tracking-widest text-indigo-600 bg-indigo-50 px-4 py-1.5 rounded-full border border-indigo-100">
+            Marketplace Hub
           </span>
-          <h1 className="text-3xl sm:text-4xl font-black text-slate-900 mt-3 mb-4 tracking-tight">
+          <h1 className="text-3xl sm:text-5xl font-black text-slate-900 mt-3 mb-4 tracking-tight">
             Browse All Categories
           </h1>
-          <p className="text-slate-500 text-sm sm:text-base mb-6">
-            Find quality second-hand goods across all major categories in Bangladesh.
+          <p className="text-slate-500 text-sm sm:text-base mb-8">
+            Discover verified second-hand items categorized for fast & easy discovery.
           </p>
 
           {/* Filter box */}
@@ -125,47 +126,49 @@ export default function CategoriesPage() {
               type="text"
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              placeholder="Search category (e.g., Electronics, Books)..."
-              className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-medium shadow-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all"
+              placeholder="Filter by category or keyword..."
+              className="w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-semibold shadow-xs outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all"
             />
           </div>
         </div>
 
         {/* Categories Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {filtered.map((category) => {
             const Icon = category.icon;
             return (
               <div
                 key={category.id}
-                className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm hover:shadow-xl hover:border-indigo-300 transition-all duration-300 flex flex-col justify-between group"
+                className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-7 shadow-xs hover:shadow-xl hover:border-indigo-300 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden"
               >
                 <div>
-                  {/* Icon Header */}
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${category.bg} text-white flex items-center justify-center shadow-md transition-transform group-hover:scale-110`}>
-                      <Icon size={22} />
+                  {/* Icon & Count */}
+                  <div className="flex items-center justify-between mb-5">
+                    <div
+                      className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${category.gradient} text-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300`}
+                    >
+                      <Icon size={24} />
                     </div>
-                    <span className="text-xs font-bold text-slate-400">
+                    <span className="text-xs font-black text-slate-400">
                       {category.count}
                     </span>
                   </div>
 
                   {/* Title & Description */}
-                  <h3 className="font-bold text-lg text-slate-900 group-hover:text-indigo-600 transition-colors mb-2">
+                  <h3 className="font-black text-lg text-slate-900 group-hover:text-indigo-600 transition-colors mb-2">
                     {category.name}
                   </h3>
-                  <p className="text-xs text-slate-500 leading-relaxed mb-4">
+                  <p className="text-xs text-slate-500 leading-relaxed mb-6 font-normal">
                     {category.description}
                   </p>
 
-                  {/* Subcategories pills */}
-                  <div className="flex flex-wrap gap-1.5 mb-6">
+                  {/* Subcategories */}
+                  <div className="flex flex-wrap gap-1.5 mb-8">
                     {category.subcategories.map((sub) => (
                       <Link
                         key={sub}
                         href={`/listings?category=${category.id}&search=${encodeURIComponent(sub)}`}
-                        className="text-[11px] font-medium bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                        className="text-[11px] font-bold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
                       >
                         {sub}
                       </Link>
@@ -176,7 +179,7 @@ export default function CategoriesPage() {
                 {/* Explore button */}
                 <Link
                   href={`/listings?category=${category.id}`}
-                  className="w-full py-2.5 bg-slate-50 group-hover:bg-indigo-600 group-hover:text-white text-slate-700 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all"
+                  className="w-full py-3 bg-slate-50 group-hover:btn-shiny-primary text-slate-700 font-black text-xs rounded-xl flex items-center justify-center gap-2 transition-all"
                 >
                   <span>Explore {category.id}</span>
                   <ArrowRight size={14} />

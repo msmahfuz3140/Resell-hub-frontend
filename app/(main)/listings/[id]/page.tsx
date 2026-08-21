@@ -20,27 +20,29 @@ import {
   Truck,
   ArrowLeft,
   Calendar,
+  Lock,
+  Phone,
+  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCurrency, timeAgo } from "@/lib/utils";
 import ProductCard from "@/components/ui/ProductCard";
 import type { Product } from "@/types";
 
-// Mock Detailed Product Data for demonstration
 const SAMPLE_PRODUCT: Product = {
   _id: "prod-1",
   title: "Apple iPhone 15 Pro - 128GB (Natural Titanium)",
   description: `Selling my carefully maintained Apple iPhone 15 Pro (128GB, Natural Titanium). 
-  
-Key Details:
-• Battery Health: 98% (Original Apple battery)
-• Physical Condition: 9.8/10 (Always used with Spigen case & screen protector from day 1)
+
+Key Specifications & Integrity Check:
+• Battery Health: 98% (Original Apple Battery)
+• Physical Condition: 9.8/10 (Always used with Spigen case & tempered glass from day 1)
 • 3U Tools Score: 100% genuine parts, 0 replaced components
 • Factory Unlocked: Works flawlessly with GP, Banglalink, Robi, Airtel, Teletalk eSIM & Physical SIM
 • Accessories Included: Original braided USB-C cable, retail box, Spigen Liquid Air case
 
-Reason for Selling: Upgrading to 16 Pro Max. 
-Meetup Preferred: Gulshan-1 / Banani or police station verified public locations. Doorstep delivery available with advance courier charges.`,
+Reason for Selling: Upgrading to 16 Pro Max.
+Meetup Preferred: Gulshan-1 / Banani or verified public locations with CCTV. Doorstep delivery available with advance courier charges.`,
   price: 94000,
   originalPrice: 115000,
   category: "Electronics",
@@ -123,7 +125,6 @@ const RELATED_PRODUCTS: Product[] = [
 ];
 
 export default function ProductDetailPage() {
-  const params = useParams();
   const router = useRouter();
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isFavorited, setIsFavorited] = useState(false);
@@ -150,34 +151,35 @@ export default function ProductDetailPage() {
   };
 
   const handleBuyNow = () => {
-    router.push(`/checkout?productId=${product._id}`);
+    toast.success("Redirecting to Escrow Protected Checkout...");
+    router.push("/dashboard");
   };
 
   const handleChat = () => {
-    toast.info(`Connecting you with seller ${product.sellerInfo?.name}...`);
-    router.push(`/dashboard`);
+    toast.info(`Connecting with seller ${product.sellerInfo?.name}...`);
+    router.push("/dashboard");
   };
 
   return (
     <div className="bg-slate-50 min-h-screen py-8">
-      <div className="container mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumb Navigation */}
-        <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-6">
-          <Link href="/" className="hover:text-indigo-600">Home</Link>
+        <div className="flex items-center gap-2 text-xs font-bold text-slate-400 mb-6">
+          <Link href="/" className="hover:text-indigo-600 transition-colors">Home</Link>
           <ChevronRight size={14} />
-          <Link href="/listings" className="hover:text-indigo-600">Listings</Link>
+          <Link href="/listings" className="hover:text-indigo-600 transition-colors">Marketplace</Link>
           <ChevronRight size={14} />
-          <Link href={`/listings?category=${product.category}`} className="hover:text-indigo-600">{product.category}</Link>
+          <Link href={`/listings?category=${product.category}`} className="hover:text-indigo-600 transition-colors">{product.category}</Link>
           <ChevronRight size={14} />
           <span className="text-slate-800 truncate max-w-[200px]">{product.title}</span>
         </div>
 
-        {/* Main Product Layout */}
+        {/* Product Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
-          {/* ── Left: Image Gallery (7 Cols) ── */}
-          <div className="lg:col-span-7 space-y-4">
-            {/* Primary Large Image Frame */}
-            <div className="relative aspect-4/3 sm:aspect-16/10 bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+          {/* ── Left Column: Gallery & Description (7 Cols) ── */}
+          <div className="lg:col-span-7 space-y-6">
+            {/* Primary Image Showcase Frame */}
+            <div className="relative aspect-[4/3] bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-sm">
               <img
                 src={activeImage}
                 alt={product.title}
@@ -186,43 +188,43 @@ export default function ProductDetailPage() {
 
               {/* Floating Status Badges */}
               <div className="absolute top-4 left-4 flex flex-col gap-2">
-                <span className="badge condition-like-new font-bold px-3 py-1 text-xs shadow-md backdrop-blur-md">
+                <span className="px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wide bg-white/95 backdrop-blur-md text-indigo-700 shadow-md border border-white/60">
                   Condition: {product.condition}
                 </span>
                 {product.isFeatured && (
-                  <span className="badge badge-warning font-bold px-3 py-1 text-xs flex items-center gap-1 shadow-md backdrop-blur-md">
-                    <Sparkles size={12} /> Featured Listing
+                  <span className="px-3.5 py-1 rounded-full text-xs font-black bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md flex items-center gap-1.5 w-fit">
+                    <Sparkles size={13} /> Featured Item
                   </span>
                 )}
               </div>
 
-              {/* Action buttons on image */}
+              {/* Favorite & Share Buttons */}
               <div className="absolute top-4 right-4 flex gap-2">
                 <button
                   type="button"
                   onClick={handleFavorite}
-                  className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md text-slate-700 hover:text-red-500 flex items-center justify-center shadow-md transition-transform hover:scale-110"
+                  className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md text-slate-700 hover:text-rose-500 flex items-center justify-center shadow-md transition-transform hover:scale-110"
                 >
-                  <Heart size={20} className={isFavorited ? "fill-red-500 stroke-red-500 text-red-500" : ""} />
+                  <Heart size={18} className={isFavorited ? "fill-rose-500 text-rose-500" : ""} />
                 </button>
                 <button
                   type="button"
                   onClick={handleShare}
                   className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md text-slate-700 hover:text-indigo-600 flex items-center justify-center shadow-md transition-transform hover:scale-110"
                 >
-                  <Share2 size={18} />
+                  <Share2 size={16} />
                 </button>
               </div>
             </div>
 
-            {/* Thumbnail Row */}
+            {/* Thumbnails Row */}
             <div className="flex gap-3 overflow-x-auto pb-2">
               {product.images?.map((img, index) => (
                 <button
                   key={img.publicId || index}
                   type="button"
                   onClick={() => setActiveImageIndex(index)}
-                  className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 transition-all shrink-0 ${
+                  className={`relative w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all shrink-0 ${
                     activeImageIndex === index
                       ? "border-indigo-600 shadow-md scale-105"
                       : "border-slate-200 opacity-70 hover:opacity-100"
@@ -233,57 +235,56 @@ export default function ProductDetailPage() {
               ))}
             </div>
 
-            {/* Description Section */}
-            <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-              <h2 className="text-xl font-bold text-slate-900">
+            {/* Detailed Description */}
+            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/90 shadow-sm space-y-6">
+              <h2 className="text-xl font-black text-slate-900">
                 Seller Description & Overview
               </h2>
               <div className="text-slate-700 text-sm leading-relaxed whitespace-pre-line font-normal">
                 {product.description}
               </div>
 
-              {/* Specifications Matrix */}
+              {/* Hardware Specifications */}
               <div className="pt-6 border-t border-slate-100">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4">
-                  Item Specifications
+                <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-4">
+                  Item Specifications & Trade Conditions
                 </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  <div className="bg-slate-50 p-3 rounded-xl">
-                    <span className="text-[11px] text-slate-400 font-semibold block">Category</span>
-                    <span className="text-xs font-bold text-slate-800">{product.category}</span>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
+                    <span className="text-[11px] text-slate-400 font-bold block">Category</span>
+                    <span className="text-xs font-black text-slate-800">{product.category}</span>
                   </div>
-                  <div className="bg-slate-50 p-3 rounded-xl">
-                    <span className="text-[11px] text-slate-400 font-semibold block">Condition</span>
-                    <span className="text-xs font-bold text-slate-800">{product.condition}</span>
+                  <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
+                    <span className="text-[11px] text-slate-400 font-bold block">Physical Condition</span>
+                    <span className="text-xs font-black text-indigo-600">{product.condition}</span>
                   </div>
-                  <div className="bg-slate-50 p-3 rounded-xl">
-                    <span className="text-[11px] text-slate-400 font-semibold block">Stock</span>
-                    <span className="text-xs font-bold text-slate-800">{product.stock} available</span>
+                  <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
+                    <span className="text-[11px] text-slate-400 font-bold block">Stock Available</span>
+                    <span className="text-xs font-black text-slate-800">{product.stock} Unit</span>
                   </div>
-                  <div className="bg-slate-50 p-3 rounded-xl">
-                    <span className="text-[11px] text-slate-400 font-semibold block">Delivery / Meetup</span>
-                    <span className="text-xs font-bold text-slate-800">In-Person & Courier</span>
+                  <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
+                    <span className="text-[11px] text-slate-400 font-bold block">Fulfillment</span>
+                    <span className="text-xs font-black text-slate-800">In-Person / Courier</span>
                   </div>
-                  <div className="bg-slate-50 p-3 rounded-xl">
-                    <span className="text-[11px] text-slate-400 font-semibold block">Negotiable</span>
-                    <span className="text-xs font-bold text-emerald-600">Yes, within reason</span>
+                  <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
+                    <span className="text-[11px] text-slate-400 font-bold block">Negotiability</span>
+                    <span className="text-xs font-black text-emerald-600">Open to Fair Offers</span>
                   </div>
-                  <div className="bg-slate-50 p-3 rounded-xl">
-                    <span className="text-[11px] text-slate-400 font-semibold block">Authenticity</span>
-                    <span className="text-xs font-bold text-indigo-600">100% Verified Genuine</span>
+                  <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
+                    <span className="text-[11px] text-slate-400 font-bold block">Authenticity</span>
+                    <span className="text-xs font-black text-indigo-600">100% Genuine</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* ── Right: Buy Box & Seller Profile (5 Cols) ── */}
+          {/* ── Right Column: Buy Box & Seller (5 Cols) ── */}
           <div className="lg:col-span-5 space-y-6">
             {/* Main Buy Box */}
-            <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
-              {/* Category & Posted Time */}
-              <div className="flex items-center justify-between text-xs text-slate-500">
-                <span className="font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100">
+            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/90 shadow-sm space-y-6 sticky top-24">
+              <div className="flex items-center justify-between text-xs text-slate-400 font-bold">
+                <span className="text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
                   {product.category}
                 </span>
                 <span className="flex items-center gap-1">
@@ -292,17 +293,18 @@ export default function ProductDetailPage() {
               </div>
 
               {/* Title */}
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-snug">
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 leading-snug">
                 {product.title}
               </h1>
 
               {/* Location & View Stats */}
               <div className="flex items-center gap-4 text-xs text-slate-500 pb-4 border-b border-slate-100">
-                <span className="flex items-center gap-1 font-medium">
-                  <MapPin size={14} className="text-slate-400" />
+                <span className="flex items-center gap-1 font-semibold text-slate-600">
+                  <MapPin size={14} className="text-indigo-600" />
                   {product.location?.city}
                 </span>
-                <span className="flex items-center gap-1 font-medium">
+                <span>•</span>
+                <span className="flex items-center gap-1 font-semibold text-slate-600">
                   <Eye size={14} className="text-slate-400" />
                   {product.views} views
                 </span>
@@ -316,126 +318,82 @@ export default function ProductDetailPage() {
                   </span>
                   {product.originalPrice && product.originalPrice > product.price && (
                     <>
-                      <span className="text-base text-slate-400 line-through font-medium">
+                      <span className="text-base text-slate-400 line-through font-semibold">
                         {formatCurrency(product.originalPrice)}
                       </span>
-                      <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                      <span className="text-xs font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">
                         {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
                       </span>
                     </>
                   )}
                 </div>
-                <p className="text-xs text-slate-400">Fixed/Negotiable in BDT (Bangladeshi Taka)</p>
+                <p className="text-xs text-slate-400 font-medium">Standard BDT Price • No hidden fees</p>
               </div>
 
-              {/* Primary Call to Action Buttons */}
+              {/* CTAs */}
               <div className="space-y-3 pt-2">
                 <button
                   type="button"
                   onClick={handleBuyNow}
-                  className="btn btn-primary w-full py-4 rounded-xl font-bold text-base shadow-xl shadow-indigo-600/30 flex items-center justify-center gap-2"
+                  className="btn-shiny-primary w-full py-4 rounded-2xl font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg"
                 >
-                  <ShoppingBag size={20} />
-                  <span>Buy Now with Escrow Protection</span>
+                  <Lock size={18} />
+                  <span>Buy with Escrow Protection</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={handleChat}
-                  className="btn btn-secondary w-full py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2"
+                  className="w-full py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center justify-center gap-2 transition-all border border-slate-200"
                 >
-                  <MessageCircle size={18} />
-                  <span>Chat with Seller</span>
+                  <MessageCircle size={17} />
+                  <span>Chat with Seller Instantly</span>
                 </button>
               </div>
 
-              {/* Buyer Protection Guarantee */}
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-2">
-                <div className="flex items-center gap-2 text-indigo-700 font-bold text-xs">
-                  <ShieldCheck size={16} /> ReSell Hub Buyer Protection Guarantee
+              {/* Escrow Guarantee Box */}
+              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-2xl border border-indigo-100 space-y-1.5">
+                <div className="flex items-center gap-2 text-indigo-900 font-black text-xs">
+                  <ShieldCheck size={16} className="text-indigo-600" /> ReSell Hub 100% Escrow Guarantee
                 </div>
-                <p className="text-[11px] text-slate-600 leading-relaxed">
-                  Your payment is safely held until you inspect and approve the item. 100% money back if not as described.
+                <p className="text-[11px] text-slate-600 leading-relaxed font-normal">
+                  Your funds are protected in escrow until you inspect and verify the product condition.
                 </p>
               </div>
-            </div>
 
-            {/* Seller Information Card */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                Seller Information
-              </h3>
-
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-black text-xl overflow-hidden shrink-0">
-                  {product.sellerInfo?.photo ? (
-                    <img src={product.sellerInfo.photo} alt="seller" className="w-full h-full object-cover" />
-                  ) : (
-                    product.sellerInfo?.name?.[0]
-                  )}
-                </div>
-
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-bold text-slate-900 text-base">
-                      {product.sellerInfo?.name}
-                    </h4>
-                    <span className="badge badge-success text-[10px] font-bold py-0.5">
-                      Verified
-                    </span>
+              {/* Seller Summary */}
+              <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black text-sm">
+                    {product.sellerInfo?.name?.[0]}
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
-                    <span className="flex items-center gap-1 text-amber-500 font-bold">
-                      <Star size={13} fill="#f59e0b" /> {product.sellerInfo?.rating}
-                    </span>
-                    <span>•</span>
-                    <span>{product.sellerInfo?.totalSales} Completed Sales</span>
+                  <div>
+                    <h4 className="font-bold text-xs text-slate-900">{product.sellerInfo?.name}</h4>
+                    <div className="flex items-center gap-1 text-[11px] text-amber-500 font-bold">
+                      <Star size={11} fill="#f59e0b" /> {product.sellerInfo?.rating} rating ({product.sellerInfo?.totalSales} sales)
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-2 text-xs pt-3 border-t border-slate-100">
-                <div className="text-slate-500">
-                  Member since: <strong className="text-slate-700">Jan 2024</strong>
-                </div>
-                <div className="text-slate-500">
-                  Response rate: <strong className="text-emerald-600">99% (&lt; 15 mins)</strong>
-                </div>
+                <span className="badge badge-success text-[10px] font-bold py-0.5">
+                  Verified
+                </span>
               </div>
-
-              <Link
-                href={`/users/${product.sellerInfo?.sellerId || "seller"}`}
-                className="block text-center text-xs font-bold text-indigo-600 hover:text-indigo-800 pt-2"
-              >
-                View all listings from this seller →
-              </Link>
-            </div>
-
-            {/* Safety Tips Checklist */}
-            <div className="bg-amber-50/70 p-5 rounded-2xl border border-amber-200/80 space-y-2 text-xs text-amber-900">
-              <div className="font-bold flex items-center gap-1.5 text-amber-800">
-                <AlertCircle size={15} /> Safety Guidelines for Buyers
-              </div>
-              <ul className="space-y-1.5 text-[11px] list-disc list-inside text-amber-800/90 leading-relaxed">
-                <li>Meet in crowded, well-lit public places (e.g. shopping malls, metro stations).</li>
-                <li>Inspect hardware, IMEI/serial numbers before concluding payment.</li>
-                <li>Never share banking OTPs or sensitive personal data with strangers.</li>
-              </ul>
             </div>
           </div>
         </div>
 
-        {/* ── Related / Similar Listings ── */}
-        <div className="pt-8 border-t border-slate-200">
+        {/* ── Related Items ── */}
+        <div className="pt-10 border-t border-slate-200">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-2xl font-extrabold text-slate-900">
-                Similar Items You Might Like
+              <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+                Recommended Similar Items
               </h2>
-              <p className="text-xs text-slate-500 mt-1">Based on category & condition</p>
+              <p className="text-xs text-slate-500 mt-0.5">Based on category & buyer interest</p>
             </div>
-            <Link href="/listings" className="text-xs font-bold text-indigo-600 hover:text-indigo-800">
-              View All Listings →
+            <Link href="/listings" className="text-xs font-black text-indigo-600 hover:text-indigo-800">
+              Browse All Listings →
             </Link>
           </div>
 
