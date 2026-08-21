@@ -1,13 +1,16 @@
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+
 export default function MainLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-      {/* Navbar will be added here in Phase 2 */}
-      <main style={{ flex: 1 }}>{children}</main>
-      {/* Footer will be added here in Phase 2 */}
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
+      <main className="flex-grow pt-[68px]">{children}</main>
+      <Footer />
     </div>
   );
 }

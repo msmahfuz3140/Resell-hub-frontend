@@ -15,6 +15,8 @@ export function formatPrice(price: number, currency = "BDT"): string {
   }).format(price);
 }
 
+export const formatCurrency = formatPrice;
+
 export function formatDate(date: string | Date): string {
   return new Intl.DateTimeFormat("en-BD", {
     year: "numeric",
@@ -38,6 +40,8 @@ export function formatRelativeTime(date: string | Date): string {
   if (diffMin > 0) return `${diffMin}m ago`;
   return "just now";
 }
+
+export const timeAgo = formatRelativeTime;
 
 export function truncate(text: string, length = 100): string {
   if (text.length <= length) return text;

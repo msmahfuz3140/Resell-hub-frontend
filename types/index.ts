@@ -15,23 +15,39 @@ export interface User {
     country?: string | null;
   };
   bio?: string | null;
-  isVerified: boolean;
-  isActive: boolean;
-  rating: {
+  isVerified?: boolean;
+  isActive?: boolean;
+  rating?: {
     average: number;
     count: number;
   };
-  totalSales: number;
+  totalSales?: number;
   createdAt: string;
   updatedAt: string;
 }
 
-// Product Types
+// Product Image Types
 export interface ProductImage {
   url: string;
-  publicId: string;
+  publicId?: string;
+  isPrimary?: boolean;
 }
 
+// Seller Info Subdocument
+export interface SellerInfo {
+  sellerId: string;
+  name: string;
+  photo?: string | null;
+  phone?: string | null;
+  rating?: number;
+  totalSales?: number;
+  location?: {
+    city?: string | null;
+    country?: string | null;
+  };
+}
+
+// Product Types
 export interface Product {
   _id: string;
   title: string;
@@ -41,20 +57,22 @@ export interface Product {
   images: ProductImage[];
   category: string;
   condition: "New" | "Like New" | "Good" | "Fair" | "Poor";
-  seller: User;
+  seller?: User;
+  sellerInfo?: SellerInfo;
+  stock?: number;
   location: {
     city: string;
     state?: string | null;
     country: string;
   };
-  status: "active" | "sold" | "pending" | "rejected" | "draft";
-  isFeatured: boolean;
+  status: "active" | "sold" | "pending" | "rejected" | "draft" | "archived";
+  isFeatured?: boolean;
   views: number;
-  favorites: string[];
-  favoritesCount: number;
-  tags: string[];
-  negotiable: boolean;
-  meetupPreference: "In-person" | "Delivery" | "Both";
+  favorites?: string[];
+  favoritesCount?: number;
+  tags?: string[];
+  negotiable?: boolean;
+  meetupPreference?: "In-person" | "Delivery" | "Both";
   soldTo?: string | null;
   soldAt?: string | null;
   createdAt: string;
@@ -129,6 +147,7 @@ export interface RegisterFormData {
   email: string;
   password: string;
   confirmPassword: string;
+  role?: "buyer" | "seller";
 }
 
 export interface LoginFormData {
