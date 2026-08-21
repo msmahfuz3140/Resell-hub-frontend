@@ -19,6 +19,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import ProductCard from "@/components/ui/ProductCard";
+import LocationSelector from "@/components/ui/LocationSelector";
 import { CATEGORIES } from "@/lib/constants";
 import type { Product } from "@/types";
 
@@ -488,23 +489,16 @@ function ListingsContent() {
                 </div>
               </div>
 
-              {/* Location Select */}
+              {/* Location Selector */}
               <div>
                 <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400 mb-3">
                   Location
                 </h4>
-                <div className="relative">
-                  <MapPin size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <select
-                    value={selectedCity}
-                    onChange={(e) => setSelectedCity(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2.5 text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl text-slate-800 outline-none"
-                  >
-                    {CITIES.map((city) => (
-                      <option key={city} value={city}>{city}</option>
-                    ))}
-                  </select>
-                </div>
+                <LocationSelector
+                  value={selectedCity}
+                  onChange={setSelectedCity}
+                  className="w-full"
+                />
               </div>
 
               {/* Price Slider */}

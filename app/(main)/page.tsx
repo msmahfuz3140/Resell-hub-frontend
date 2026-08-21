@@ -43,6 +43,7 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import ProductCard from "@/components/ui/ProductCard";
+import LocationSelector from "@/components/ui/LocationSelector";
 import productService from "@/services/productService";
 import type { Product } from "@/types";
 
@@ -551,21 +552,11 @@ export default function HomePage() {
                 </div>
 
                 <div className="flex items-center gap-2 w-full sm:w-auto">
-                  <div className="relative w-full sm:w-44">
-                    <MapPin size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <select
-                      value={selectedCity}
-                      onChange={(e) => setSelectedCity(e.target.value)}
-                      className="w-full pl-9 pr-3 py-3 bg-slate-50/90 rounded-2xl border border-slate-200/80 text-xs font-bold text-slate-700 outline-none cursor-pointer"
-                    >
-                      <option>All Bangladesh</option>
-                      <option>Dhaka</option>
-                      <option>Chittagong</option>
-                      <option>Sylhet</option>
-                      <option>Rajshahi</option>
-                      <option>Khulna</option>
-                    </select>
-                  </div>
+                  <LocationSelector
+                    value={selectedCity}
+                    onChange={setSelectedCity}
+                    className="w-full sm:w-48"
+                  />
 
                   <button
                     type="submit"
