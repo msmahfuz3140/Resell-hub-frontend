@@ -4,7 +4,9 @@ export interface User {
   name: string;
   email: string;
   avatar?: string | null;
-  role: "user" | "admin";
+  photo?: { url: string | null; publicId: string | null } | null;
+  role: "buyer" | "seller" | "admin";
+  status: "active" | "inactive" | "banned";
   provider: "local" | "google";
   phone?: string | null;
   location?: {

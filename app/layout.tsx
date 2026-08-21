@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { SITE_CONFIG } from "@/lib/constants";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -23,6 +24,7 @@ export const metadata: Metadata = {
     "sell",
     "used items",
     "bangladesh",
+    "resell",
   ],
   openGraph: {
     title: SITE_CONFIG.name,
@@ -40,17 +42,17 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
-        {children}
-        <Toaster
-          position="top-right"
-          richColors
-          closeButton
-          toastOptions={{
-            style: {
-              fontFamily: "var(--font-inter)",
-            },
-          }}
-        />
+        <AuthProvider>
+          {children}
+          <Toaster
+            position="top-right"
+            richColors
+            closeButton
+            toastOptions={{
+              style: { fontFamily: "var(--font-inter)" },
+            }}
+          />
+        </AuthProvider>
       </body>
     </html>
   );
