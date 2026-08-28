@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -13,32 +12,22 @@ import {
   EyeOff,
   Mail,
   Lock,
-  User as UserIcon,
+  User,
   ShoppingBag,
   ArrowRight,
-  ShoppingCart,
-  Tag,
-  CheckCircle2,
-  ShieldCheck,
-  Sparkles,
+  Loader2,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
-const registerSchema = z
-  .object({
-    name: z.string().min(2, "Name must be at least 2 characters").max(50, "Name too long"),
-    email: z.string().email("Please enter a valid email address"),
-    password: z
-      .string()
-      .min(6, "Password must be at least 6 characters")
-      .regex(/^(?=.*[a-zA-Z])(?=.*\d)/, "Password must contain a letter and a number"),
-    confirmPassword: z.string(),
-    role: z.enum(["buyer", "seller"]),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+const registerSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Please enter a valid email address"),
+  password: z
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .regex(/^(?=.*[a-zA-Z])(?=.*\d)/, "Must contain at least 1 letter and 1 number"),
+  role: z.enum(["buyer", "seller"]),
+});
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
@@ -51,11 +40,10 @@ const GoogleIcon = () => (
   </svg>
 );
 
-export default function RegisterPage() {
-  const router = useRouter();
-  const { register: authRegister } = useAuth();
+function RegisterContent() {
+  const { register: authRegister, googleLogin } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const {
     register,
@@ -71,32 +59,29 @@ export default function RegisterPage() {
   const selectedRole = watch("role");
 
   const onSubmit = async (data: RegisterFormData) => {
-    try {
-      await authRegister({
-        name: data.name,
-        email: data.email,
-        password: data.password,
-        role: data.role,
-      });
-      toast.success("Account created successfully! Welcome to ReSell Hub 🎉");
-      router.push("/dashboard");
-    } catch (err: any) {
-      const message = err?.response?.data?.message || "Registration failed. Please try again.";
-      toast.error(message);
-    }
+    await authRegister({
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      role: data.role,
+    });
+    toast.success("Account created! Welcome to ReSell Hub 🎉");
+    window.location.href = "/dashboard";
   };
 
-  const handleGoogleLogin = () => {
-    toast.info("Google OAuth registration initialized.");
+  const handleGoogleClick = async () => {
+    setIsGoogleLoading(true);
+    await googleLogin();
+    toast.success("Signed up with Google! 🎉");
+    window.location.href = "/dashboard";
   };
 
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-slate-900">
-      {/* ── Left Ambient Showcase (5 Cols) ── */}
+      {/* ── Left Panel ── */}
       <div className="hidden lg:flex lg:col-span-5 flex-col justify-between p-12 bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 text-white relative overflow-hidden border-r border-slate-800">
         <div className="absolute top-0 right-0 w-96 h-96 bg-purple-600/20 rounded-full blur-[100px] pointer-events-none" />
 
-        {/* Brand */}
         <Link href="/" className="flex items-center gap-3 relative z-10">
           <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/30">
             <ShoppingBag size={22} className="text-white" />
@@ -106,17 +91,13 @@ export default function RegisterPage() {
           </span>
         </Link>
 
-        {/* Perks list */}
         <div className="space-y-6 relative z-10">
           <div className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-widest text-indigo-400">
-              Why Join the Hub?
-            </span>
+            <span className="text-xs font-black uppercase tracking-widest text-indigo-400">Why Join the Hub?</span>
             <h2 className="text-3xl font-black leading-tight text-white">
               Buy & Sell second-hand items with complete confidence.
             </h2>
           </div>
-
           <div className="space-y-3 pt-2">
             {[
               "100% Escrow Protection on purchases",
@@ -125,193 +106,154 @@ export default function RegisterPage() {
               "Verified identity badges & trusted seller reviews",
             ].map((perk) => (
               <div key={perk} className="flex items-center gap-3 text-xs font-bold text-slate-200">
-                <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/30">
-                  ✓
-                </span>
+                <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/30">✓</span>
                 <span>{perk}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <p className="text-xs text-slate-400 relative z-10">
-          © {new Date().getFullYear()} ReSell Hub. All rights reserved.
-        </p>
+        <p className="text-xs text-slate-400 relative z-10">© {new Date().getFullYear()} ReSell Hub. All rights reserved.</p>
       </div>
 
-      {/* ── Right Form (7 Cols) ── */}
-      <div className="lg:col-span-7 bg-slate-50 flex items-center justify-center p-6 sm:p-12 overflow-y-auto">
+      {/* ── Right Form ── */}
+      <div className="lg:col-span-7 bg-slate-50 flex items-center justify-center p-6 sm:p-12">
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-md bg-white p-8 sm:p-10 rounded-3xl border border-slate-200/90 shadow-xl space-y-5"
+          className="w-full max-w-md bg-white p-8 sm:p-10 rounded-3xl border border-slate-200/90 shadow-xl space-y-6"
         >
           <div>
             <span className="text-xs font-extrabold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100 uppercase tracking-widest">
-              Free Membership
+              Create Account
             </span>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 mt-2">
-              Create your account 🛍️
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1 font-normal">
-              Join thousands of smart buyers and sellers across Bangladesh.
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 mt-2">Join ReSell Hub Free</h1>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              Already have an account?{" "}
+              <Link href="/login" className="font-extrabold text-indigo-600 hover:text-indigo-800">Sign in here</Link>
             </p>
           </div>
 
-          {/* Role selector pills */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-2">
-              I am joining primarily to:
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setValue("role", "buyer")}
-                className={`p-3.5 rounded-2xl border text-center transition-all flex flex-col items-center gap-1 cursor-pointer ${
-                  selectedRole === "buyer"
-                    ? "border-indigo-600 bg-indigo-50/60 shadow-sm"
-                    : "border-slate-200 bg-slate-50 hover:bg-slate-100"
-                }`}
-              >
-                <ShoppingCart size={18} className={selectedRole === "buyer" ? "text-indigo-600" : "text-slate-400"} />
-                <span className={`text-xs font-black ${selectedRole === "buyer" ? "text-indigo-900" : "text-slate-700"}`}>
-                  Buy Items
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setValue("role", "seller")}
-                className={`p-3.5 rounded-2xl border text-center transition-all flex flex-col items-center gap-1 cursor-pointer ${
-                  selectedRole === "seller"
-                    ? "border-amber-500 bg-amber-50/60 shadow-sm"
-                    : "border-slate-200 bg-slate-50 hover:bg-slate-100"
-                }`}
-              >
-                <Tag size={18} className={selectedRole === "seller" ? "text-amber-600" : "text-slate-400"} />
-                <span className={`text-xs font-black ${selectedRole === "seller" ? "text-amber-900" : "text-slate-700"}`}>
-                  Sell Items
-                </span>
-              </button>
-            </div>
-          </div>
-
-          {/* Google SSO */}
+          {/* Google */}
           <button
             type="button"
-            onClick={handleGoogleLogin}
-            className="w-full py-2.5 px-4 rounded-2xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs flex items-center justify-center gap-2.5 transition-all shadow-xs"
+            onClick={handleGoogleClick}
+            disabled={isGoogleLoading}
+            className="w-full py-3.5 px-4 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-2xl text-xs sm:text-sm font-bold flex items-center justify-center gap-3 transition-all shadow-xs hover:border-slate-300"
           >
-            <GoogleIcon />
+            {isGoogleLoading ? <Loader2 size={16} className="animate-spin text-indigo-600" /> : <GoogleIcon />}
             <span>Sign up with Google</span>
           </button>
 
-          {/* Divider */}
-          <div className="flex items-center gap-3 text-xs text-slate-400">
-            <div className="flex-1 h-px bg-slate-200" />
-            <span className="font-semibold uppercase tracking-wider text-[10px]">Or with email</span>
-            <div className="flex-1 h-px bg-slate-200" />
+          <div className="relative flex items-center justify-center">
+            <div className="border-t border-slate-200 w-full" />
+            <span className="bg-white px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider relative">Or with Details</span>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-3.5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {/* Role */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Full Name
-              </label>
+              <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wide mb-1.5">I want to:</label>
+              <div className="grid grid-cols-2 gap-2">
+                {(["buyer", "seller"] as const).map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setValue("role", r)}
+                    className={`py-2.5 rounded-xl text-xs font-black transition-all border ${
+                      selectedRole === r
+                        ? r === "buyer"
+                          ? "bg-slate-900 text-white border-slate-900"
+                          : "bg-indigo-600 text-white border-indigo-600"
+                        : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+                    }`}
+                  >
+                    {r === "buyer" ? "Buy Items" : "Sell Items"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Name */}
+            <div>
+              <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wide mb-1.5">Full Name</label>
               <div className="relative">
-                <UserIcon size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="text"
                   {...register("name")}
                   placeholder="e.g. Mahfuzul Haque"
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-semibold outline-none focus:border-indigo-500 focus:bg-white transition-all"
+                  className={`w-full pl-11 pr-4 py-3 bg-slate-50 border rounded-2xl text-xs sm:text-sm font-semibold text-slate-800 outline-none focus:bg-white transition-all ${
+                    errors.name ? "border-rose-400" : "border-slate-200 focus:border-indigo-500"
+                  }`}
                 />
               </div>
-              {errors.name && <p className="text-[11px] text-rose-500 font-semibold mt-1">{errors.name.message}</p>}
+              {errors.name && <p className="text-[11px] text-rose-500 font-bold mt-1">{errors.name.message}</p>}
             </div>
 
+            {/* Email */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Email Address
-              </label>
+              <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wide mb-1.5">Email Address</label>
               <div className="relative">
-                <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="email"
                   {...register("email")}
-                  placeholder="you@example.com"
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-semibold outline-none focus:border-indigo-500 focus:bg-white transition-all"
+                  placeholder="name@example.com"
+                  className={`w-full pl-11 pr-4 py-3 bg-slate-50 border rounded-2xl text-xs sm:text-sm font-semibold text-slate-800 outline-none focus:bg-white transition-all ${
+                    errors.email ? "border-rose-400" : "border-slate-200 focus:border-indigo-500"
+                  }`}
                 />
               </div>
-              {errors.email && <p className="text-[11px] text-rose-500 font-semibold mt-1">{errors.email.message}</p>}
+              {errors.email && <p className="text-[11px] text-rose-500 font-bold mt-1">{errors.email.message}</p>}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Password
-                </label>
-                <div className="relative">
-                  <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    {...register("password")}
-                    placeholder="Min 6 chars"
-                    className="w-full pl-9 pr-9 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-semibold outline-none focus:border-indigo-500 focus:bg-white transition-all"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                  >
-                    {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
-                  </button>
-                </div>
-                {errors.password && <p className="text-[10px] text-rose-500 font-semibold mt-1">{errors.password.message}</p>}
+            {/* Password */}
+            <div>
+              <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wide mb-1.5">Password</label>
+              <div className="relative">
+                <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  {...register("password")}
+                  placeholder="At least 6 chars (letters & numbers)"
+                  className={`w-full pl-11 pr-11 py-3 bg-slate-50 border rounded-2xl text-xs sm:text-sm font-semibold text-slate-800 outline-none focus:bg-white transition-all ${
+                    errors.password ? "border-rose-400" : "border-slate-200 focus:border-indigo-500"
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Confirm Password
-                </label>
-                <div className="relative">
-                  <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type={showConfirm ? "text" : "password"}
-                    {...register("confirmPassword")}
-                    placeholder="Repeat password"
-                    className="w-full pl-9 pr-9 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-semibold outline-none focus:border-indigo-500 focus:bg-white transition-all"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirm(!showConfirm)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                  >
-                    {showConfirm ? <EyeOff size={14} /> : <Eye size={14} />}
-                  </button>
-                </div>
-                {errors.confirmPassword && <p className="text-[10px] text-rose-500 font-semibold mt-1">{errors.confirmPassword.message}</p>}
-              </div>
+              {errors.password && <p className="text-[11px] text-rose-500 font-bold mt-1">{errors.password.message}</p>}
             </div>
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="btn-shiny-primary w-full py-3.5 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg mt-2"
+              className="w-full btn-shiny-primary py-3.5 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg disabled:opacity-70"
             >
-              {isSubmitting ? <span>Creating account...</span> : <span>Create Free Account</span>}
+              {isSubmitting ? (
+                <><Loader2 size={16} className="animate-spin" /> Creating Account...</>
+              ) : (
+                <>Create Account <ArrowRight size={16} /></>
+              )}
             </button>
           </form>
-
-          <p className="text-center text-xs text-slate-500 font-medium">
-            Already have an account?{" "}
-            <Link href="/login" className="font-bold text-indigo-600 hover:text-indigo-800">
-              Sign In
-            </Link>
-          </p>
         </motion.div>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-900" />}>
+      <RegisterContent />
+    </Suspense>
   );
 }

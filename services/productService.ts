@@ -21,6 +21,21 @@ export const productService = {
   },
 
   /**
+   * Get seller's own products
+   */
+  getMyProducts: async (filters: { search?: string; status?: string; page?: number; limit?: number; sort?: string } = {}) => {
+    const params = new URLSearchParams();
+    if (filters.search) params.append("search", filters.search);
+    if (filters.status && filters.status !== "all") params.append("status", filters.status);
+    if (filters.page) params.append("page", String(filters.page));
+    if (filters.limit) params.append("limit", String(filters.limit));
+    if (filters.sort) params.append("sort", filters.sort);
+
+    const res = await api.get<PaginatedResponse<Product>>(`/products/my-products?${params.toString()}`);
+    return res.data;
+  },
+
+  /**
    * Get featured products for homepage
    */
   getFeaturedProducts: async () => {
@@ -37,6 +52,42 @@ export const productService = {
   },
 
   /**
+   * Get reviews for a product
+   */
+  getProductReviews: async (productId: string, page = 1) => {
+    const res = await api.get(`/products/${productId}/reviews?page=${page}&limit=10`);
+    return res.data;
+  },
+
+  /**
+   * Create a new product (multipart/form-data for images)
+   */
+  createProduct: async (formData: FormData) => {
+    const res = await api.post<ApiResponse<{ product: Product }>>("/products", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res.data;
+  },
+
+  /**
+   * Update an existing product
+   */
+  updateProduct: async (id: string, formData: FormData) => {
+    const res = await api.put<ApiResponse<{ product: Product }>>(`/products/${id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res.data;
+  },
+
+  /**
+   * Delete a product
+   */
+  deleteProduct: async (id: string) => {
+    const res = await api.delete<ApiResponse<null>>(`/products/${id}`);
+    return res.data;
+  },
+
+  /**
    * Toggle favorite/wishlist status
    */
   toggleFavorite: async (productId: string) => {
@@ -48,3 +99,4 @@ export const productService = {
 };
 
 export default productService;
+

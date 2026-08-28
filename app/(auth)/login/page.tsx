@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -15,9 +15,7 @@ import {
   Lock,
   ShoppingBag,
   ArrowRight,
-  ShieldCheck,
-  CheckCircle2,
-  Sparkles,
+  Loader2,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -37,42 +35,65 @@ const GoogleIcon = () => (
   </svg>
 );
 
-export default function LoginPage() {
-  const router = useRouter();
+function LoginContent() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormData>({ resolver: zodResolver(loginSchema) });
 
   const onSubmit = async (data: LoginFormData) => {
-    try {
-      await login(data.email, data.password);
-      toast.success("Welcome back to ReSell Hub! 👋");
-      router.push(callbackUrl);
-    } catch (err: any) {
-      const message = err?.response?.data?.message || "Invalid credentials. Please try again.";
-      toast.error(message);
-    }
+    await login(data.email, data.password);
+    toast.success("Welcome back to ReSell Hub! 👋");
+    window.location.href = callbackUrl;
   };
 
-  const handleGoogleLogin = () => {
-    toast.info("Google OAuth login initialized.");
+  const handleGoogleClick = async () => {
+    setIsGoogleLoading(true);
+    await googleLogin();
+    toast.success("Signed in with Google! 🎉");
+    window.location.href = callbackUrl;
+  };
+
+  const [isDemoLoggingIn, setIsDemoLoggingIn] = useState<string | null>(null);
+
+  const handle1ClickDemoLogin = async (role: "buyer" | "seller" | "admin") => {
+    try {
+      setIsDemoLoggingIn(role);
+      const creds = {
+        buyer: { email: "buyer@resellhub.com", password: "Buyer12345", name: "Buyer User" },
+        seller: { email: "seller@resellhub.com", password: "Seller12345", name: "Top Seller" },
+        admin: { email: "admin@resellhub.com", password: "Admin12345", name: "Admin Manager" },
+      };
+      setValue("email", creds[role].email);
+      setValue("password", creds[role].password);
+      
+      toast.loading(`Signing in as ${role.toUpperCase()}...`, { id: "demo-login" });
+      await login(creds[role].email, creds[role].password);
+      toast.success(`Success! Logged in as ${role.toUpperCase()} 🎉`, { id: "demo-login" });
+      
+      window.location.href = callbackUrl;
+    } catch {
+      toast.error("Login attempt failed. Please try again.", { id: "demo-login" });
+    } finally {
+      setIsDemoLoggingIn(null);
+    }
   };
 
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-slate-900">
-      {/* ── Left Ambient Showcase Column (5 Cols) ── */}
+      {/* ── Left Panel ── */}
       <div className="hidden lg:flex lg:col-span-5 flex-col justify-between p-12 bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 text-white relative overflow-hidden border-r border-slate-800">
         <div className="absolute top-0 left-0 w-96 h-96 bg-indigo-600/20 rounded-full blur-[100px] pointer-events-none" />
 
-        {/* Brand */}
         <Link href="/" className="flex items-center gap-3 relative z-10">
           <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/30">
             <ShoppingBag size={22} className="text-white" />
@@ -82,7 +103,6 @@ export default function LoginPage() {
           </span>
         </Link>
 
-        {/* Center Testimonial Card */}
         <div className="space-y-6 relative z-10">
           <div className="p-6 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl space-y-4">
             <div className="flex gap-1 text-amber-400">
@@ -91,12 +111,10 @@ export default function LoginPage() {
               ))}
             </div>
             <p className="text-sm text-slate-200 leading-relaxed italic">
-              &ldquo;ReSell Hub made buying a used iPhone effortless. With escrow protection, I didn&apos;t have to worry about broken parts or scams.&rdquo;
+              &ldquo;ReSell Hub made buying a used iPhone effortless. With escrow protection, I didn&apos;t have to worry about scams.&rdquo;
             </p>
             <div className="flex items-center gap-3 pt-2">
-              <div className="w-8 h-8 rounded-full bg-indigo-500 text-white font-black text-xs flex items-center justify-center">
-                T
-              </div>
+              <div className="w-8 h-8 rounded-full bg-indigo-500 text-white font-black text-xs flex items-center justify-center">T</div>
               <div>
                 <h4 className="text-xs font-bold text-white">Tanzid Hossain</h4>
                 <p className="text-[10px] text-indigo-300">Verified Trader from Dhaka</p>
@@ -105,28 +123,25 @@ export default function LoginPage() {
           </div>
 
           <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
-              <span className="text-lg font-black text-white block">50K+</span>
-              <span className="text-[10px] text-slate-400 font-bold uppercase">Listings</span>
-            </div>
-            <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
-              <span className="text-lg font-black text-white block">25K+</span>
-              <span className="text-[10px] text-slate-400 font-bold uppercase">Traders</span>
-            </div>
-            <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
-              <span className="text-lg font-black text-emerald-400 block">100%</span>
-              <span className="text-[10px] text-slate-400 font-bold uppercase">Safe Escrow</span>
-            </div>
+            {[
+              { val: "50K+", label: "Listings" },
+              { val: "25K+", label: "Traders" },
+              { val: "100%", label: "Safe Escrow", color: "text-emerald-400" },
+            ].map((s) => (
+              <div key={s.label} className="p-3 rounded-2xl bg-white/5 border border-white/10">
+                <span className={`text-lg font-black block ${s.color || "text-white"}`}>{s.val}</span>
+                <span className="text-[10px] text-slate-400 font-bold uppercase">{s.label}</span>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Footer info */}
         <p className="text-xs text-slate-400 relative z-10">
           © {new Date().getFullYear()} ReSell Hub. All rights reserved.
         </p>
       </div>
 
-      {/* ── Right Form Column (7 Cols) ── */}
+      {/* ── Right Form ── */}
       <div className="lg:col-span-7 bg-slate-50 flex items-center justify-center p-6 sm:p-12">
         <motion.div
           initial={{ opacity: 0, y: 15 }}
@@ -138,97 +153,136 @@ export default function LoginPage() {
               Account Login
             </span>
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 mt-2">
-              Welcome back 👋
+              Sign in to your account
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Sign in to manage your ads, purchases, and messages.
+              Don&apos;t have an account?{" "}
+              <Link href="/register" className="font-extrabold text-indigo-600 hover:text-indigo-800">
+                Register for free
+              </Link>
             </p>
           </div>
 
-          {/* Google SSO */}
+          {/* Google */}
           <button
             type="button"
-            onClick={handleGoogleLogin}
-            className="w-full py-3 px-4 rounded-2xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs flex items-center justify-center gap-2.5 transition-all shadow-xs"
+            onClick={handleGoogleClick}
+            disabled={isGoogleLoading}
+            className="w-full py-3.5 px-4 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-2xl text-xs sm:text-sm font-bold flex items-center justify-center gap-3 transition-all shadow-xs hover:border-slate-300"
           >
-            <GoogleIcon />
+            {isGoogleLoading ? (
+              <Loader2 size={16} className="animate-spin text-indigo-600" />
+            ) : (
+              <GoogleIcon />
+            )}
             <span>Continue with Google</span>
           </button>
 
-          {/* Divider */}
-          <div className="flex items-center gap-3 text-xs text-slate-400">
-            <div className="flex-1 h-px bg-slate-200" />
-            <span className="font-semibold uppercase tracking-wider text-[10px]">Or with email</span>
-            <div className="flex-1 h-px bg-slate-200" />
+          <div className="relative flex items-center justify-center">
+            <div className="border-t border-slate-200 w-full" />
+            <span className="bg-white px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider relative">
+              Or with Email
+            </span>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
+              <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wide mb-1.5">
                 Email Address
               </label>
               <div className="relative">
-                <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="email"
                   {...register("email")}
-                  placeholder="you@example.com"
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-semibold outline-none focus:border-indigo-500 focus:bg-white transition-all"
+                  placeholder="name@example.com"
+                  className={`w-full pl-11 pr-4 py-3 bg-slate-50 border rounded-2xl text-xs sm:text-sm font-semibold text-slate-800 outline-none focus:bg-white transition-all ${
+                    errors.email ? "border-rose-400" : "border-slate-200 focus:border-indigo-500"
+                  }`}
                 />
               </div>
-              {errors.email && (
-                <p className="text-[11px] text-rose-500 font-semibold mt-1">{errors.email.message}</p>
-              )}
+              {errors.email && <p className="text-[11px] text-rose-500 font-bold mt-1">{errors.email.message}</p>}
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-bold text-slate-700">
-                  Password
-                </label>
-                <Link href="/forgot-password" className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800">
-                  Forgot?
-                </Link>
+                <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wide">Password</label>
+                <Link href="#" className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800">Forgot?</Link>
               </div>
               <div className="relative">
-                <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type={showPassword ? "text" : "password"}
                   {...register("password")}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-semibold outline-none focus:border-indigo-500 focus:bg-white transition-all"
+                  className={`w-full pl-11 pr-11 py-3 bg-slate-50 border rounded-2xl text-xs sm:text-sm font-semibold text-slate-800 outline-none focus:bg-white transition-all ${
+                    errors.password ? "border-rose-400" : "border-slate-200 focus:border-indigo-500"
+                  }`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
-              {errors.password && (
-                <p className="text-[11px] text-rose-500 font-semibold mt-1">{errors.password.message}</p>
-              )}
+              {errors.password && <p className="text-[11px] text-rose-500 font-bold mt-1">{errors.password.message}</p>}
             </div>
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="btn-shiny-primary w-full py-3.5 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg"
+              className="w-full btn-shiny-primary py-3.5 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg disabled:opacity-70"
             >
-              {isSubmitting ? <span>Authenticating...</span> : <span>Sign In to ReSell Hub</span>}
+              {isSubmitting ? (
+                <><Loader2 size={16} className="animate-spin" /> Signing in...</>
+              ) : (
+                <>Sign In <ArrowRight size={16} /></>
+              )}
             </button>
           </form>
 
-          <p className="text-center text-xs text-slate-500 font-medium">
-            Don&apos;t have an account yet?{" "}
-            <Link href="/register" className="font-bold text-indigo-600 hover:text-indigo-800">
-              Create free account
-            </Link>
-          </p>
+          {/* 1-Click Demo Login */}
+          <div className="pt-3 border-t border-slate-100 text-center">
+            <span className="text-[11px] font-black uppercase tracking-wider text-slate-400 block mb-2.5">
+              ⚡ 1-Click Instant Demo Login:
+            </span>
+            <div className="grid grid-cols-3 gap-2">
+              {(["buyer", "seller", "admin"] as const).map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  disabled={!!isDemoLoggingIn}
+                  onClick={() => handle1ClickDemoLogin(r)}
+                  className={`py-2 px-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 shadow-sm border ${
+                    r === "buyer"
+                      ? "bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200"
+                      : r === "seller"
+                      ? "bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200"
+                      : "bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200"
+                  }`}
+                >
+                  {isDemoLoggingIn === r ? (
+                    <Loader2 size={13} className="animate-spin" />
+                  ) : (
+                    <span>{r === "buyer" ? "🛒 Buyer" : r === "seller" ? "💼 Seller" : "👑 Admin"}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
         </motion.div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-900" />}>
+      <LoginContent />
+    </Suspense>
   );
 }

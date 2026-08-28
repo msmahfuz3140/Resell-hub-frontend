@@ -2,11 +2,14 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Heart, MapPin, Sparkles, Star, ShieldCheck, ArrowUpRight } from "lucide-react";
+import { Heart, MapPin, Sparkles, Star, ShieldCheck, ArrowUpRight, ImageOff } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatCurrency, timeAgo } from "@/lib/utils";
+import ProductImage from "@/components/ui/ProductImage";
 import type { Product } from "@/types";
 import { toast } from "sonner";
+
+import { isLocalFavorite, toggleLocalFavorite } from "@/lib/favorites";
 
 interface ProductCardProps {
   product: Product;
@@ -17,25 +20,28 @@ interface ProductCardProps {
 export default function ProductCard({
   product,
   onFavoriteToggle,
-  isFavorite = false,
+  isFavorite,
 }: ProductCardProps) {
-  const [fav, setFav] = useState(isFavorite);
+  const [fav, setFav] = useState(() => {
+    if (typeof isFavorite === "boolean") return isFavorite;
+    return isLocalFavorite(product._id);
+  });
 
   const handleFavClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setFav(!fav);
+    const res = toggleLocalFavorite(product);
+    setFav(res.isFavorited);
     if (onFavoriteToggle) {
       onFavoriteToggle(product._id);
-    } else {
-      toast.success(fav ? "Removed from wishlist" : "Added to wishlist! ❤️");
     }
+    toast.success(res.isFavorited ? "Saved to wishlist! ❤️" : "Removed from wishlist");
   };
 
   const primaryImage =
     product.images?.find((img) => img.isPrimary)?.url ||
     product.images?.[0]?.url ||
-    "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80";
+    null;
 
   const discount =
     product.originalPrice && product.originalPrice > product.price
@@ -53,12 +59,22 @@ export default function ProductCard({
       <Link href={`/listings/${product._id}`} className="block">
         {/* ── Image & Badges Frame ── */}
         <div className="relative aspect-[4/3] bg-slate-100 overflow-hidden">
-          <img
-            src={primaryImage}
-            alt={product.title}
-            loading="lazy"
-            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-108"
-          />
+          {primaryImage ? (
+            <ProductImage
+              src={primaryImage}
+              alt={product.title}
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-108"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-tr from-slate-100 via-indigo-50/30 to-slate-200 flex flex-col items-center justify-center text-slate-400 p-4">
+              <div className="w-12 h-12 rounded-2xl bg-white/90 shadow-xs border border-slate-200/80 flex items-center justify-center text-slate-400 mb-1.5 group-hover:scale-105 transition-transform">
+                <ImageOff size={22} className="text-slate-400" />
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                No Image Available
+              </span>
+            </div>
+          )}
 
           {/* Condition & Featured Pills */}
           <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">

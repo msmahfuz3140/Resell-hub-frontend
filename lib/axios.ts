@@ -14,7 +14,9 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("accessToken");
+      const token =
+        localStorage.getItem("resellhub_token") ||
+        localStorage.getItem("accessToken");
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -24,7 +26,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor - handle token refresh
+// Response interceptor - handle token refresh without abruptly wiping sessions
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -32,23 +34,23 @@ api.interceptors.response.use(
 
     if (
       error.response?.status === 401 &&
-      !originalRequest._retry &&
-      !originalRequest.url?.includes("/auth/refresh")
+      !originalRequest?._retry &&
+      !originalRequest?.url?.includes("/auth/refresh") &&
+      !originalRequest?.url?.includes("/auth/login") &&
+      !originalRequest?.url?.includes("/auth/me")
     ) {
       originalRequest._retry = true;
       try {
         const { data } = await api.post("/auth/refresh");
         const newToken = data.data?.accessToken;
         if (newToken) {
+          localStorage.setItem("resellhub_token", newToken);
           localStorage.setItem("accessToken", newToken);
           originalRequest.headers.Authorization = `Bearer ${newToken}`;
           return api(originalRequest);
         }
       } catch {
-        if (typeof window !== "undefined") {
-          localStorage.removeItem("accessToken");
-          window.location.href = "/login";
-        }
+        // Keep session for offline/demo resilience
       }
     }
 

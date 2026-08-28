@@ -12,7 +12,7 @@ interface ProtectedRouteProps {
 
 /**
  * Wraps pages that require authentication.
- * Optionally restricts to specific roles.
+ * Reads from localStorage first for instant auth check.
  */
 export default function ProtectedRoute({
   children,
@@ -25,58 +25,26 @@ export default function ProtectedRoute({
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.replace(redirectTo);
-      return;
     }
+  }, [isLoading, isAuthenticated, redirectTo, router]);
 
-    if (!isLoading && isAuthenticated && allowedRoles && user) {
-      if (!allowedRoles.includes(user.role as any)) {
-        router.replace("/dashboard"); // Redirect to dashboard if wrong role
-      }
-    }
-  }, [isLoading, isAuthenticated, user, allowedRoles, redirectTo, router]);
-
-  // Loading state
+  // While loading, show a brief loading spinner
   if (isLoading) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "var(--bg-secondary)",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "1rem",
-          }}
-        >
-          <div
-            style={{
-              width: "48px",
-              height: "48px",
-              border: "3px solid var(--border-color)",
-              borderTopColor: "var(--color-primary)",
-              borderRadius: "50%",
-              animation: "spin 0.8s linear infinite",
-            }}
-          />
-          <p style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>
-            Loading...
-          </p>
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-3 border-slate-200 border-t-indigo-600 rounded-full animate-spin" />
+          <p className="text-sm text-slate-400 font-semibold">Loading...</p>
         </div>
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
 
+  // Not authenticated — render nothing while redirect happens
   if (!isAuthenticated) return null;
 
-  if (allowedRoles && user && !allowedRoles.includes(user.role as any)) {
+  // Role check
+  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
     return null;
   }
 

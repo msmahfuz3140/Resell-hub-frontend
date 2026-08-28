@@ -20,7 +20,8 @@ export interface User {
   rating?: {
     average: number;
     count: number;
-  };
+  } | number;
+  totalPurchases?: number;
   totalSales?: number;
   createdAt: string;
   updatedAt: string;
@@ -80,36 +81,89 @@ export interface Product {
 }
 
 // Order Types
+export interface OrderParticipant {
+  userId: string;
+  name: string;
+  email: string;
+  phone?: string | null;
+  photo?: string | null;
+  location?: {
+    city?: string | null;
+    country?: string | null;
+  };
+}
+
+export interface OrderProductSnapshot {
+  productId: string;
+  title: string;
+  image?: string | null;
+  price: number;
+  category: string;
+  condition: string;
+}
+
 export interface Order {
   _id: string;
   orderNumber: string;
-  buyer: User;
-  seller: User;
-  product: Product;
+  buyerInfo: OrderParticipant;
+  sellerInfo: OrderParticipant;
+  productId: string;
+  productSnapshot: OrderProductSnapshot;
   amount: number;
   platformFee: number;
   sellerAmount: number;
-  status:
-    | "pending"
-    | "payment_processing"
-    | "paid"
+  paymentStatus: "unpaid" | "pending" | "paid" | "failed" | "refunded" | "partially_refunded";
+  paymentMethod: "stripe" | "cash" | "bank_transfer";
+  orderStatus:
+    | "placed"
+    | "confirmed"
+    | "processing"
     | "shipped"
     | "delivered"
     | "completed"
     | "cancelled"
-    | "refunded";
-  paymentMethod: "stripe" | "cash";
-  stripePaymentIntentId?: string | null;
+    | "disputed";
   shippingAddress?: {
+    fullName: string;
+    phone: string;
     street: string;
     city: string;
-    state?: string;
-    postalCode: string;
+    state?: string | null;
+    postalCode?: string | null;
     country: string;
   };
-  notes?: string | null;
+  trackingNumber?: string | null;
+  buyerNote?: string | null;
+  sellerNote?: string | null;
+  cancelReason?: string | null;
+  confirmedAt?: string | null;
+  shippedAt?: string | null;
+  deliveredAt?: string | null;
+  completedAt?: string | null;
+  cancelledAt?: string | null;
+  isReviewed?: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+// Admin & Dashboard Types
+export interface AdminStats {
+  totalUsers: number;
+  totalSellers: number;
+  totalBuyers: number;
+  totalProducts: number;
+  activeProducts: number;
+  pendingProducts: number;
+  totalOrders: number;
+  completedOrders: number;
+  totalGMV: number;
+  platformRevenue: number;
+}
+
+export interface AdminCharts {
+  userGrowth: { month: string; users: number; sellers: number }[];
+  monthlyOrders: { month: string; orders: number; revenue: number }[];
+  categoryDistribution: { _id: string; count: number }[];
 }
 
 // API Response Types

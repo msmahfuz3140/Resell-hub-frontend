@@ -1,12 +1,16 @@
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg-secondary)" }}>
-      {/* Dashboard sidebar will be added in Phase 4 */}
-      {children}
+    <div className="flex flex-col min-h-screen bg-slate-50">
+      <Navbar />
+      <main className="flex-grow pt-[68px]">{children}</main>
+      <Footer />
     </div>
   );
 }
