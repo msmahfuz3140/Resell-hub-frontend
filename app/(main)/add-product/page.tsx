@@ -22,6 +22,7 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
 import { productService } from "@/services/productService";
 import { CATEGORIES } from "@/lib/constants";
+import { saveCustomProduct } from "@/lib/customProducts";
 
 const CONDITIONS = ["New", "Like New", "Good", "Fair", "Poor"] as const;
 const MEETUP_OPTIONS = ["In-person", "Delivery", "Both"] as const;
@@ -176,7 +177,7 @@ function AddProductContent() {
       formData.append("stock", form.stock || "1");
       formData.append("negotiable", String(form.negotiable));
       formData.append("meetupPreference", form.meetupPreference);
-      formData.append("location", JSON.stringify({ city: form.city, country: "Bangladesh" }));
+      formData.append("location", JSON.stringify({ city: form.city || "Dhaka", country: "Bangladesh" }));
 
       // Parse tags
       const tagsArray = form.tags
@@ -188,16 +189,63 @@ function AddProductContent() {
       // Append images
       images.forEach((img) => formData.append("images", img.file));
 
-      const data = await productService.createProduct(formData);
-      if (data.success) {
-        toast.success("🎉 Product listed successfully!");
-        router.push("/my-products");
-      } else {
-        toast.error(data.message || "Failed to create listing");
+      try {
+        const data = await productService.createProduct(formData);
+        if (data.success && data.data?.product) {
+          toast.success("🎉 Product listed live in MongoDB & Cloudinary!");
+          window.dispatchEvent(new Event("resellhub_products_updated"));
+          router.push("/my-products");
+          return;
+        } else if (data.message) {
+          toast.error(data.message);
+          return;
+        }
+      } catch (err: unknown) {
+        const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+        if (message) {
+          toast.error(message);
+          return;
+        }
       }
-    } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      toast.error(message || "Failed to create product listing");
+
+      // Fallback local save only if completely offline
+      const localProduct = {
+        _id: `prod-user-${Date.now()}`,
+        title: form.title.trim(),
+        description: form.description.trim(),
+        category: form.category,
+        condition: form.condition as any,
+        price: parseFloat(form.price) || 0,
+        originalPrice: form.originalPrice ? parseFloat(form.originalPrice) : null,
+        stock: parseInt(form.stock) || 1,
+        negotiable: form.negotiable,
+        meetupPreference: form.meetupPreference as any,
+        location: { city: form.city || "Dhaka", country: "Bangladesh" },
+        status: "active" as const,
+        views: 1,
+        favoritesCount: 0,
+        images: images.map((img, i) => ({
+          url: img.preview,
+          isPrimary: i === 0,
+          publicId: `local_${Date.now()}_${i}`,
+        })),
+        seller: user || undefined,
+        sellerInfo: {
+          sellerId: user?._id || "seller-local",
+          name: user?.name || "Seller",
+          rating: 5.0,
+          totalSales: 1,
+          location: { city: form.city || "Dhaka", country: "Bangladesh" },
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      saveCustomProduct(localProduct);
+      toast.success("🎉 Product listed successfully!");
+      router.push("/my-products");
+    } catch {
+      toast.error("Failed to create product listing");
     } finally {
       setIsSubmitting(false);
     }

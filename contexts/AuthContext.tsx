@@ -150,6 +150,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // ── Login ───────────────────────────────────────
   const login = useCallback(async (email: string, password: string) => {
+    try {
+      const data = await authService.login({ email, password });
+      if (data.success && data.data) {
+        saveToken(data.data.accessToken);
+        saveUser(data.data.user);
+        setUser(data.data.user);
+        return;
+      }
+    } catch {
+      // Fallback to local session if backend unreachable
+    }
+
     // Determine role from email
     const role: "buyer" | "seller" | "admin" = email.includes("admin")
       ? "admin"
@@ -162,24 +174,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .replace(/[._-]/g, " ")
       .replace(/\b\w/g, (c) => c.toUpperCase());
 
-    // Create local user instantly (no API wait)
     const localUser = createLocalUser(prettyName, email, role);
     saveToken(`local_${Date.now()}`);
     saveUser(localUser);
     setUser(localUser);
-
-    // Try API in background (non-blocking)
-    withTimeout(authService.login({ email, password }), 3000)
-      .then((data) => {
-        if (data.success && data.data) {
-          saveToken(data.data.accessToken);
-          saveUser(data.data.user);
-          setUser(data.data.user);
-        }
-      })
-      .catch(() => {
-        // Keep local user
-      });
   }, []);
 
   // ── Register ────────────────────────────────────
@@ -190,30 +188,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       password: string;
       role?: string;
     }) => {
-      // Determine role
+      try {
+        const data = await authService.register(formData);
+        if (data.success && data.data) {
+          saveToken(data.data.accessToken);
+          saveUser(data.data.user);
+          setUser(data.data.user);
+          return;
+        }
+      } catch {
+        // Fallback to local session if backend unreachable
+      }
+
       const role = (formData.role === "seller" ? "seller" : formData.role === "admin" ? "admin" : "buyer") as
         | "buyer"
         | "seller"
         | "admin";
 
-      // Create local user instantly (no API wait)
       const localUser = createLocalUser(formData.name, formData.email, role);
       saveToken(`local_${Date.now()}`);
       saveUser(localUser);
       setUser(localUser);
-
-      // Try API in background (non-blocking)
-      withTimeout(authService.register(formData), 3000)
-        .then((data) => {
-          if (data.success && data.data) {
-            saveToken(data.data.accessToken);
-            saveUser(data.data.user);
-            setUser(data.data.user);
-          }
-        })
-        .catch(() => {
-          // Keep local user
-        });
     },
     []
   );

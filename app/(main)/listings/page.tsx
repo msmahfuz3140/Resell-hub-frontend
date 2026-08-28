@@ -19,6 +19,7 @@ import Pagination from "@/components/ui/Pagination";
 import LocationSelector from "@/components/ui/LocationSelector";
 import { CATEGORIES, SORT_OPTIONS } from "@/lib/constants";
 import { productService } from "@/services/productService";
+import { getCustomProducts } from "@/lib/customProducts";
 import type { Product } from "@/types";
 
 const CONDITIONS = ["All", "New", "Like New", "Good", "Fair", "Poor"];
@@ -305,7 +306,8 @@ function ListingsContent() {
 
   // Filter fallback products locally if API is connecting/offline
   const getFilteredFallback = useCallback(() => {
-    let list = [...FALLBACK_LISTINGS];
+    const custom = getCustomProducts();
+    let list = [...custom, ...FALLBACK_LISTINGS];
 
     if (debouncedSearch) {
       const q = debouncedSearch.toLowerCase();
@@ -317,7 +319,7 @@ function ListingsContent() {
       );
     }
     if (selectedCategory !== "All") {
-      list = list.filter((p) => p.category === selectedCategory);
+      list = list.filter((p) => p.category.toLowerCase() === selectedCategory.toLowerCase());
     }
     if (selectedCondition !== "All") {
       list = list.filter((p) => p.condition === selectedCondition);
@@ -352,17 +354,10 @@ function ListingsContent() {
         page,
         limit: 12,
       });
-      if (data.data && data.data.length > 0) {
-        setProducts(data.data);
-        setMeta(data.meta);
-      } else {
-        // Use local fallback
-        const fallback = getFilteredFallback();
-        setProducts(fallback);
-        setMeta({ page: 1, limit: 12, total: fallback.length, totalPages: 1, hasNextPage: false, hasPrevPage: false });
-      }
+      setProducts(data.data || []);
+      setMeta(data.meta || { page: 1, limit: 12, total: (data.data || []).length, totalPages: 1, hasNextPage: false, hasPrevPage: false });
     } catch {
-      // Graceful fallback on network/DB connection
+      // Fallback only if backend completely unreachable
       const fallback = getFilteredFallback();
       setProducts(fallback);
       setMeta({ page: 1, limit: 12, total: fallback.length, totalPages: 1, hasNextPage: false, hasPrevPage: false });
@@ -373,6 +368,12 @@ function ListingsContent() {
 
   useEffect(() => {
     fetchProducts();
+  }, [fetchProducts]);
+
+  useEffect(() => {
+    const handleUpdate = () => { fetchProducts(); };
+    window.addEventListener("resellhub_products_updated", handleUpdate);
+    return () => { window.removeEventListener("resellhub_products_updated", handleUpdate); };
   }, [fetchProducts]);
 
   // Reset page when filters change

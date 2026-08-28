@@ -33,6 +33,7 @@ import ProductImage from "@/components/ui/ProductImage";
 import { productService } from "@/services/productService";
 import { useAuth } from "@/contexts/AuthContext";
 import { isLocalFavorite, toggleLocalFavorite } from "@/lib/favorites";
+import { findCustomProductById } from "@/lib/customProducts";
 import type { Product } from "@/types";
 
 // ─── Review Types ─────────────────────────────────
@@ -474,7 +475,26 @@ export default function ProductDetailPage() {
       // If API fails or product not in DB, check fallback map below
     }
 
-    // 2. Check local fallback map
+    // 2. Check custom local products
+    const custom = findCustomProductById(id as string);
+    if (custom) {
+      setProduct(custom);
+      setReviews(SAMPLE_REVIEWS);
+      setRatingStats({
+        avgRating: 5.0,
+        count: 1,
+        rating1: 0,
+        rating2: 0,
+        rating3: 0,
+        rating4: 0,
+        rating5: 1,
+      });
+      fetchRelated(custom.category, custom._id);
+      setIsLoading(false);
+      return;
+    }
+
+    // 3. Check local fallback map
     const fallback = FALLBACK_PRODUCTS_MAP[id as string];
     if (fallback) {
       setProduct(fallback);
@@ -493,7 +513,7 @@ export default function ProductDetailPage() {
       return;
     }
 
-    // 3. Not found
+    // 4. Not found
     setError("Product not found");
     setIsLoading(false);
   }, [id, user]);

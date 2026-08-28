@@ -69,18 +69,19 @@ function LoginContent() {
     try {
       setIsDemoLoggingIn(role);
       const creds = {
-        buyer: { email: "buyer@resellhub.com", password: "Buyer12345", name: "Buyer User" },
-        seller: { email: "seller@resellhub.com", password: "Seller12345", name: "Top Seller" },
-        admin: { email: "admin@resellhub.com", password: "Admin12345", name: "Admin Manager" },
+        buyer: { email: "buyer@resellhub.com", password: "Buyer@123456", name: "Rahim Chowdhury" },
+        seller: { email: "seller@resellhub.com", password: "Seller@123456", name: "Tanvir Ahmed" },
+        admin: { email: "admin@resellhub.com", password: "Admin@123456", name: "Mahfuz Admin" },
       };
       setValue("email", creds[role].email);
       setValue("password", creds[role].password);
-      
+
       toast.loading(`Signing in as ${role.toUpperCase()}...`, { id: "demo-login" });
       await login(creds[role].email, creds[role].password);
       toast.success(`Success! Logged in as ${role.toUpperCase()} 🎉`, { id: "demo-login" });
-      
-      window.location.href = callbackUrl;
+
+      const targetUrl = role === "admin" ? "/admin" : callbackUrl !== "/dashboard" ? callbackUrl : "/dashboard";
+      window.location.href = targetUrl;
     } catch {
       toast.error("Login attempt failed. Please try again.", { id: "demo-login" });
     } finally {

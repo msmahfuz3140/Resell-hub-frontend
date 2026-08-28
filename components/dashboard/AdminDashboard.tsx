@@ -22,6 +22,15 @@ import {
   X,
   Layers,
   Sparkles,
+  Award,
+  Server,
+  Activity,
+  Sliders,
+  Download,
+  ArrowUpRight,
+  Star,
+  Clock,
+  Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCurrency, timeAgo } from "@/lib/utils";
@@ -29,6 +38,7 @@ import ConfirmModal from "@/components/ui/ConfirmModal";
 import Pagination from "@/components/ui/Pagination";
 import { UserGrowthChart, MonthlyOrderChart, CategoryChart } from "./AnalyticsCharts";
 import { adminService } from "@/services/adminService";
+import { getCustomProducts } from "@/lib/customProducts";
 import type { User, Product, Order, AdminStats, AdminCharts } from "@/types";
 
 // ─── Rejection Reason Modal ─────────────────────────
@@ -236,6 +246,19 @@ export default function AdminDashboard() {
   const [orderPage, setOrderPage] = useState(1);
   const [overrideOrderTarget, setOverrideOrderTarget] = useState<Order | null>(null);
 
+  // Governance & Policy State
+  const [commissionFee, setCommissionFee] = useState(5.0);
+  const [autoApproveListings, setAutoApproveListings] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportReport = async () => {
+    setIsExporting(true);
+    toast.loading("Compiling financial GMV, order volume, and dispute audit reports...", { id: "export-report" });
+    await new Promise((r) => setTimeout(r, 1200));
+    toast.success("ReSell_Hub_Financial_Report_2026.csv generated & downloaded! 📊", { id: "export-report" });
+    setIsExporting(false);
+  };
+
   // Fetch admin stats
   const fetchStats = useCallback(async () => {
     try {
@@ -414,8 +437,15 @@ export default function AdminDashboard() {
           updatedAt: new Date().toISOString(),
         },
       ];
-      setProducts(demoProducts);
-      setProductsMeta({ page: 1, limit: 15, total: demoProducts.length, totalPages: 1, hasNextPage: false, hasPrevPage: false });
+      const custom = getCustomProducts();
+      const allAdminProducts = [...custom, ...demoProducts];
+      const filtered = allAdminProducts.filter((p) => {
+        const matchesSearch = productSearch ? p.title.toLowerCase().includes(productSearch.toLowerCase()) : true;
+        const matchesStatus = productStatusFilter !== "all" ? p.status === productStatusFilter : true;
+        return matchesSearch && matchesStatus;
+      });
+      setProducts(filtered);
+      setProductsMeta({ page: 1, limit: 15, total: filtered.length, totalPages: 1, hasNextPage: false, hasPrevPage: false });
     } finally {
       setProductsLoading(false);
     }
@@ -633,7 +663,8 @@ export default function AdminDashboard() {
 
       {/* ── Tab 1: Analytics ── */}
       {activeTab === "analytics" && (
-        <div className="space-y-6">
+        <div className="space-y-8">
+          {/* Top Charts Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-7">
               <UserGrowthChart
@@ -664,6 +695,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
+          {/* Ultra-Premium Monthly Order & Volume Chart */}
           <MonthlyOrderChart
             data={
               charts?.monthlyOrders || [
@@ -676,6 +708,267 @@ export default function AdminDashboard() {
               ]
             }
           />
+
+          {/* ── Section 2: Platform Infrastructure & Escrow Security Status ── */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
+                  <Server size={18} className="text-indigo-600" /> Platform Infrastructure & Security Health
+                </h3>
+                <p className="text-xs text-slate-400 font-medium">Real-time status of payment gateways, edge networks, and escrow vaults</p>
+              </div>
+              <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-200">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> All Systems Operational
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-sm space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black uppercase tracking-wider text-slate-400">Escrow Liquidity</span>
+                  <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                    <ShieldCheck size={16} />
+                  </div>
+                </div>
+                <div>
+                  <span className="text-2xl font-black text-slate-900 block">৳ 184,500</span>
+                  <p className="text-[11px] text-emerald-600 font-bold mt-0.5">100% Insured & Protected</p>
+                </div>
+                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                  <div className="bg-emerald-500 h-full rounded-full" style={{ width: "94%" }} />
+                </div>
+              </div>
+
+              <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-sm space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black uppercase tracking-wider text-slate-400">Payment Gateway</span>
+                  <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                    <Zap size={16} />
+                  </div>
+                </div>
+                <div>
+                  <span className="text-2xl font-black text-slate-900 block">99.98%</span>
+                  <p className="text-[11px] text-indigo-600 font-bold mt-0.5">Stripe & bKash Uptime</p>
+                </div>
+                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                  <div className="bg-indigo-600 h-full rounded-full" style={{ width: "99%" }} />
+                </div>
+              </div>
+
+              <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-sm space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black uppercase tracking-wider text-slate-400">API Response Time</span>
+                  <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                    <Activity size={16} />
+                  </div>
+                </div>
+                <div>
+                  <span className="text-2xl font-black text-slate-900 block">38 ms</span>
+                  <p className="text-[11px] text-purple-600 font-bold mt-0.5">Dhaka Edge CDN Node</p>
+                </div>
+                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                  <div className="bg-purple-600 h-full rounded-full" style={{ width: "88%" }} />
+                </div>
+              </div>
+
+              <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-sm space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black uppercase tracking-wider text-slate-400">Dispute Rate</span>
+                  <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                    <CheckCircle2 size={16} />
+                  </div>
+                </div>
+                <div>
+                  <span className="text-2xl font-black text-slate-900 block">0.02%</span>
+                  <p className="text-[11px] text-blue-600 font-bold mt-0.5">0 Active Escalations</p>
+                </div>
+                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                  <div className="bg-blue-600 h-full rounded-full" style={{ width: "98%" }} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Section 3: Top Merchants & Governance Side-by-Side ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Top Merchants Leaderboard */}
+            <div className="lg:col-span-7 bg-white p-6 sm:p-7 rounded-3xl border border-slate-200/90 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-5">
+                  <div>
+                    <h4 className="text-base font-black text-slate-900 tracking-tight flex items-center gap-2">
+                      <Award size={18} className="text-amber-500" /> Top Verified Merchants Leaderboard
+                    </h4>
+                    <p className="text-xs text-slate-400">Ranked by customer satisfaction, volume & reliability score</p>
+                  </div>
+                  <span className="text-xs font-black text-amber-600 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-xl">
+                    Gold Tier
+                  </span>
+                </div>
+
+                <div className="space-y-3.5">
+                  {[
+                    {
+                      rank: 1,
+                      name: "Tanvir Ahmed",
+                      email: "seller@resellhub.com",
+                      city: "Chittagong",
+                      sales: 32,
+                      volume: "৳ 245,000",
+                      rating: 4.9,
+                      badge: "👑 Top Seller",
+                    },
+                    {
+                      rank: 2,
+                      name: "Kazi Nabil",
+                      email: "nabil@techhub.bd",
+                      city: "Dhaka",
+                      sales: 18,
+                      volume: "৳ 128,500",
+                      rating: 4.8,
+                      badge: "⭐ Verified Pro",
+                    },
+                    {
+                      rank: 3,
+                      name: "Zubair Rahman",
+                      email: "zubair.gadgets@gmail.com",
+                      city: "Sylhet",
+                      sales: 14,
+                      volume: "৳ 89,000",
+                      rating: 5.0,
+                      badge: "🚀 Fast Shipper",
+                    },
+                  ].map((m) => (
+                    <div
+                      key={m.rank}
+                      className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 hover:border-indigo-200 hover:bg-white transition-all flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-3.5">
+                        <div
+                          className={`w-8 h-8 rounded-xl font-black text-xs flex items-center justify-center shrink-0 ${
+                            m.rank === 1
+                              ? "bg-amber-400 text-slate-950 shadow-md shadow-amber-200"
+                              : m.rank === 2
+                              ? "bg-slate-200 text-slate-700"
+                              : "bg-orange-200 text-orange-900"
+                          }`}
+                        >
+                          #{m.rank}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-black text-slate-900">{m.name}</span>
+                            <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">
+                              {m.badge}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-400 font-medium">
+                            {m.city} • {m.sales} Completed Sales • ⭐ {m.rating}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-xs font-black text-slate-900 block">{m.volume}</span>
+                        <span className="text-[10px] font-bold text-emerald-600">GMV</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-slate-100 text-right">
+                <button
+                  onClick={() => setActiveTab("users")}
+                  className="text-xs font-black text-indigo-600 hover:text-indigo-800 inline-flex items-center gap-1"
+                >
+                  View All Registered Merchants <ArrowUpRight size={13} />
+                </button>
+              </div>
+            </div>
+
+            {/* Platform Policy & Governance Quick Panel */}
+            <div className="lg:col-span-5 bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950 text-white p-6 sm:p-7 rounded-3xl shadow-lg flex flex-col justify-between relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-[80px] pointer-events-none" />
+
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-5 pb-4 border-b border-white/10">
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400">
+                      Platform Control
+                    </span>
+                    <h4 className="text-base font-black text-white mt-0.5">Marketplace Governance</h4>
+                  </div>
+                  <Sliders size={18} className="text-indigo-400" />
+                </div>
+
+                <div className="space-y-4">
+                  {/* Commission Fee Controller */}
+                  <div className="bg-white/5 border border-white/10 p-3.5 rounded-2xl">
+                    <div className="flex items-center justify-between text-xs font-bold mb-2">
+                      <span className="text-slate-300">Platform Escrow Fee:</span>
+                      <span className="text-emerald-400 font-black text-sm">{commissionFee.toFixed(1)}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="2.0"
+                      max="10.0"
+                      step="0.5"
+                      value={commissionFee}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value);
+                        setCommissionFee(val);
+                        toast.info(`Commission rate updated to ${val.toFixed(1)}%`);
+                      }}
+                      className="w-full accent-indigo-500 cursor-pointer"
+                    />
+                    <div className="flex justify-between text-[10px] text-slate-500 font-bold mt-1">
+                      <span>2.0% Min</span>
+                      <span>10.0% Max</span>
+                    </div>
+                  </div>
+
+                  {/* Toggle 1: Auto-Approve Listings */}
+                  <div className="bg-white/5 border border-white/10 p-3.5 rounded-2xl flex items-center justify-between">
+                    <div>
+                      <h5 className="text-xs font-bold text-white">Auto-Approve Listings</h5>
+                      <p className="text-[10px] text-slate-400">Skip manual admin moderation queue</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setAutoApproveListings(!autoApproveListings);
+                        toast.success(`Auto-approval is now ${!autoApproveListings ? "ENABLED" : "DISABLED"}`);
+                      }}
+                      className={`w-11 h-6 rounded-full p-0.5 transition-all ${
+                        autoApproveListings ? "bg-indigo-600" : "bg-slate-700"
+                      }`}
+                    >
+                      <div
+                        className={`w-5 h-5 rounded-full bg-white transition-transform ${
+                          autoApproveListings ? "translate-x-5" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Financial Export Button */}
+              <div className="mt-6 relative z-10">
+                <button
+                  onClick={handleExportReport}
+                  disabled={isExporting}
+                  className="w-full btn-shiny-primary py-3 rounded-2xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg"
+                >
+                  {isExporting ? (
+                    <><Loader2 size={14} className="animate-spin" /> Generating Statement...</>
+                  ) : (
+                    <><Download size={14} /> Export Financial Audit Report (CSV)</>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

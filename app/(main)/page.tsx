@@ -41,10 +41,13 @@ import {
   PlusCircle,
   Headphones,
   ShoppingBag,
+  Truck,
+  ShieldAlert,
 } from "lucide-react";
 import ProductCard from "@/components/ui/ProductCard";
 import LocationSelector from "@/components/ui/LocationSelector";
 import productService from "@/services/productService";
+import { getCustomProducts } from "@/lib/customProducts";
 import type { Product } from "@/types";
 
 // Curated Fallback Featured Products
@@ -167,7 +170,7 @@ const FALLBACK_FEATURED_PRODUCTS: Product[] = [
     stock: 1,
     status: "active",
     location: { city: "GEC, Chittagong", country: "Bangladesh" },
-    isFeatured: false,
+    isFeatured: true,
     views: 180,
     favorites: [],
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
@@ -455,20 +458,27 @@ export default function HomePage() {
   // Dynamic fetch from backend
   useEffect(() => {
     const fetchFeatured = async () => {
+      const custom = getCustomProducts();
       try {
         setLoadingProducts(true);
         const data = await productService.getFeaturedProducts();
         if (data.success && data.data?.products && data.data.products.length > 0) {
-          setProducts(data.data.products);
+          setProducts([...custom, ...data.data.products]);
+        } else {
+          setProducts([...custom, ...FALLBACK_FEATURED_PRODUCTS]);
         }
       } catch {
-        // Use rich fallback products
-        setProducts(FALLBACK_FEATURED_PRODUCTS);
+        setProducts([...custom, ...FALLBACK_FEATURED_PRODUCTS]);
       } finally {
         setLoadingProducts(false);
       }
     };
+
     fetchFeatured();
+
+    const handleUpdate = () => { fetchFeatured(); };
+    window.addEventListener("resellhub_products_updated", handleUpdate);
+    return () => { window.removeEventListener("resellhub_products_updated", handleUpdate); };
   }, []);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -480,9 +490,11 @@ export default function HomePage() {
     }
   };
 
-  const filteredFeatured = activeCategoryTab === "All"
-    ? products
-    : products.filter((p) => p.category === activeCategoryTab);
+  // Only display products with isFeatured: true in the Featured section (exactly 4 products)
+  const featuredOnly = products.filter((p) => Boolean(p.isFeatured));
+  const filteredFeatured = (activeCategoryTab === "All"
+    ? featuredOnly
+    : featuredOnly.filter((p) => p.category.toLowerCase() === activeCategoryTab.toLowerCase())).slice(0, 4);
 
   return (
     <div className="min-h-screen bg-slate-50 overflow-x-hidden">
@@ -776,237 +788,415 @@ export default function HomePage() {
       </section>
 
       {/* ============================================================
-          5. SUSTAINABILITY IMPACT & CIRCULAR ECONOMY
+          5. THE RESELL HUB ESCROW PROTOCOL (SAFETY ARCHITECTURE)
           ============================================================ */}
-      <section className="py-20 bg-gradient-to-br from-emerald-950 via-slate-900 to-indigo-950 text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
+      <section className="py-24 bg-[#070B14] text-white relative overflow-hidden">
+        {/* Glow Spheres */}
+        <div className="absolute top-0 left-1/4 w-[600px] h-[350px] bg-indigo-600/15 rounded-full blur-[140px] pointer-events-none" />
+        <div className="absolute bottom-0 right-1/4 w-[500px] h-[350px] bg-emerald-500/15 rounded-full blur-[130px] pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-black uppercase tracking-widest mb-4">
+              <ShieldCheck size={14} className="animate-pulse" /> 100% Scam-Free Guarantee
+            </span>
+            <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
+              The ReSell Hub <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-cyan-300 to-indigo-400">Escrow Protocol</span>
+            </h2>
+            <p className="text-slate-400 text-sm sm:text-base mt-4 max-w-2xl mx-auto leading-relaxed">
+              We eliminate traditional marketplace risks. Your payment remains locked in our secure vault until you personally inspect and approve the item.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              {
+                step: "01",
+                icon: ShoppingCart,
+                color: "indigo",
+                title: "1. Secure Order & Vaulting",
+                desc: "Buyer purchases item. 100% of the funds are deposited into our encrypted escrow vault, not sent directly to seller.",
+                badge: "Funds 100% Locked",
+              },
+              {
+                step: "02",
+                icon: Truck,
+                color: "cyan",
+                title: "2. Verified Doorstep Pickup",
+                desc: "Seller packs item. Our verified courier partners (RedX / SteadFast) pick up and provide real-time GPS tracking.",
+                badge: "Tracked 64 Districts",
+              },
+              {
+                step: "03",
+                icon: Search,
+                color: "amber",
+                title: "3. 48-Hour Test Window",
+                desc: "Buyer receives parcel and gets 48 hours to thoroughly test functionality, battery health, and authenticity.",
+                badge: "Inspection Guaranteed",
+              },
+              {
+                step: "04",
+                icon: Zap,
+                color: "emerald",
+                title: "4. Instant Automated Payout",
+                desc: "Buyer approves item. Escrow instantly releases payout to seller via bKash, Nagad, or direct bank transfer in 30s.",
+                badge: "Instant 30s Payout",
+              },
+            ].map((card, i) => {
+              const Icon = card.icon;
+              return (
+                <motion.div
+                  key={card.step}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                  className="relative p-6 sm:p-8 rounded-3xl bg-slate-900/80 border border-slate-800/80 backdrop-blur-xl hover:border-slate-700 transition-all group flex flex-col justify-between"
+                >
+                  <div className="absolute top-6 right-6 text-2xl font-black text-slate-800 group-hover:text-slate-700 transition-colors">
+                    {card.step}
+                  </div>
+
+                  <div>
+                    <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform text-white shadow-inner">
+                      <Icon size={26} className={card.color === "emerald" ? "text-emerald-400" : card.color === "cyan" ? "text-cyan-400" : card.color === "amber" ? "text-amber-400" : "text-indigo-400"} />
+                    </div>
+
+                    <h3 className="text-lg font-black text-white mb-2">{card.title}</h3>
+                    <p className="text-xs sm:text-sm text-slate-400 leading-relaxed mb-6 font-normal">
+                      {card.desc}
+                    </p>
+                  </div>
+
+                  <div className="pt-4 border-t border-slate-800/60 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                    <span className="text-[11px] font-bold text-slate-300">{card.badge}</span>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          <div className="mt-12 p-6 rounded-3xl bg-gradient-to-r from-emerald-950/40 via-indigo-950/40 to-slate-900 border border-emerald-500/20 flex flex-col sm:flex-row items-center justify-between gap-6 backdrop-blur-xl">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                <ShieldAlert size={26} />
+              </div>
+              <div>
+                <h4 className="text-base font-black text-white">100% Money-Back Buyer Protection</h4>
+                <p className="text-xs text-slate-400">If the received item doesn&apos;t match the ad or is defective, get a full refund instantly.</p>
+              </div>
+            </div>
+            <Link
+              href="/listings"
+              className="btn-shiny-emerald px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider shrink-0"
+            >
+              Shop with Escrow Safety
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          6. COMPARISON MATRIX (RESELL HUB VS TRADITIONAL CLASSIFIEDS)
+          ============================================================ */}
+      <section className="py-24 bg-white border-y border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <span className="text-xs font-extrabold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3.5 py-1.5 rounded-full border border-indigo-100">
+              Why We Are Different
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mt-2 tracking-tight">
+              Why 50,000+ Bangladeshis Choose ReSell Hub
+            </h2>
+            <p className="text-slate-500 text-xs sm:text-sm mt-2">
+              Say goodbye to dangerous stranger meetups, fake payment screenshots, and zero return policies.
+            </p>
+          </div>
+
+          <div className="overflow-x-auto">
+            <div className="min-w-[650px] bg-slate-50 rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+              <div className="grid grid-cols-12 pb-4 border-b border-slate-200 text-xs font-black text-slate-400 uppercase tracking-wider">
+                <div className="col-span-6">Marketplace Feature</div>
+                <div className="col-span-3 text-center text-indigo-600 font-extrabold flex items-center justify-center gap-1">
+                  <Sparkles size={14} /> ReSell Hub Platform
+                </div>
+                <div className="col-span-3 text-center text-slate-400 font-normal">
+                  Traditional Classifieds / Social Groups
+                </div>
+              </div>
+
+              {[
+                {
+                  feature: "Escrow Payment Vault (Funds released after buyer approval)",
+                  rh: true,
+                  trad: false,
+                  rhText: "100% Protected",
+                  tradText: "High Scam & Fraud Risk",
+                },
+                {
+                  feature: "Doorstep Courier Pickup & Delivery with Tracking",
+                  rh: true,
+                  trad: false,
+                  rhText: "64 Districts Covered",
+                  tradText: "Dangerous Stranger Meetups",
+                },
+                {
+                  feature: "48-Hour Inspection & Return Window",
+                  rh: true,
+                  trad: false,
+                  rhText: "Full Refund Policy",
+                  tradText: "No Returns (Blocked by Seller)",
+                },
+                {
+                  feature: "Verified NID / Merchant Identity Badges",
+                  rh: true,
+                  trad: false,
+                  rhText: "Verified Trust Profiles",
+                  tradText: "Anonymous Burner Accounts",
+                },
+                {
+                  feature: "Instant Automated bKash & Bank Payouts",
+                  rh: true,
+                  trad: false,
+                  rhText: "30-Second Instant Release",
+                  tradText: "Manual & Delayed Cash Handover",
+                },
+                {
+                  feature: "24/7 Dedicated Dispute Mediation Team",
+                  rh: true,
+                  trad: false,
+                  rhText: "Live Human Arbitration",
+                  tradText: "Zero Support / Zero Recourse",
+                },
+              ].map((row, idx) => (
+                <div
+                  key={row.feature}
+                  className={`grid grid-cols-12 py-4 items-center text-xs sm:text-sm border-b border-slate-200/60 last:border-0 ${
+                    idx % 2 === 0 ? "bg-white/60" : "bg-transparent"
+                  } px-3 rounded-xl`}
+                >
+                  <div className="col-span-6 font-bold text-slate-800">{row.feature}</div>
+                  <div className="col-span-3 text-center font-black text-emerald-600 flex items-center justify-center gap-1.5">
+                    <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-[10px] font-black">✓</span>
+                    <span>{row.rhText}</span>
+                  </div>
+                  <div className="col-span-3 text-center text-rose-500 font-medium flex items-center justify-center gap-1.5">
+                    <span className="w-5 h-5 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center text-[10px] font-black">✕</span>
+                    <span className="text-slate-500">{row.tradText}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          7. VIP MOBILE EXPERIENCE & SELLER HIGHLIGHT
+          ============================================================ */}
+      <section className="py-24 bg-gradient-to-br from-[#0B101D] via-[#0E1528] to-[#121B33] text-white relative overflow-hidden">
+        <div className="absolute top-1/2 -left-32 w-96 h-96 bg-indigo-600/20 rounded-full blur-[140px] pointer-events-none" />
+        <div className="absolute top-1/4 -right-32 w-96 h-96 bg-purple-600/20 rounded-full blur-[140px] pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             <div className="lg:col-span-6 space-y-6">
-              <span className="text-xs font-black uppercase tracking-widest text-emerald-400 bg-emerald-950/90 px-3.5 py-1.5 rounded-full border border-emerald-800">
-                Eco & Social Impact
+              <span className="text-xs font-black uppercase tracking-widest text-indigo-300 bg-indigo-900/60 px-3.5 py-1.5 rounded-full border border-indigo-700">
+                Seamless Mobile Experience
               </span>
               <h2 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
-                Second-Hand is the Future of Sustainable Living
+                Trade Anytime, Anywhere with Instant Live Push
               </h2>
-              <p className="text-slate-300 text-sm sm:text-base leading-relaxed font-normal">
-                By trading pre-owned items on ReSell Hub, you are directly preventing hazardous electronic waste and cutting down carbon emissions associated with manufacturing new products.
+              <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
+                Connect directly with buyers and sellers through end-to-end encrypted messaging, receive real-time price-drop alerts, and track your escrow payouts in real-time.
               </p>
 
               <div className="grid grid-cols-2 gap-4 pt-2">
-                <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
-                  <div className="text-3xl font-black text-emerald-400">120+ Tons</div>
-                  <div className="text-xs text-slate-300 font-bold mt-1">E-Waste Prevented</div>
-                </div>
-                <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
-                  <div className="text-3xl font-black text-emerald-400">450+ MT</div>
-                  <div className="text-xs text-slate-300 font-bold mt-1">CO₂ Emissions Saved</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="bg-white/5 backdrop-blur-xl p-6 rounded-3xl border border-white/10 space-y-3">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
-                  <Recycle size={24} />
-                </div>
-                <h3 className="font-bold text-base text-white">Circular Lifecycles</h3>
-                <p className="text-xs text-slate-300 leading-relaxed font-normal">
-                  Give gadgets, fashion, and furniture a 2nd and 3rd life rather than dumping them into landfills.
-                </p>
-              </div>
-
-              <div className="bg-white/5 backdrop-blur-xl p-6 rounded-3xl border border-white/10 space-y-3">
-                <div className="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold">
-                  <BadgePercent size={24} />
-                </div>
-                <h3 className="font-bold text-base text-white">Up to 60% Savings</h3>
-                <p className="text-xs text-slate-300 leading-relaxed font-normal">
-                  Enjoy genuine flagship tech and designer goods at a fraction of their retail market price.
-                </p>
-              </div>
-
-              <div className="bg-white/5 backdrop-blur-xl p-6 rounded-3xl border border-white/10 space-y-3">
-                <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold">
-                  <ShieldCheck size={24} />
-                </div>
-                <h3 className="font-bold text-base text-white">Zero Scam Escrow</h3>
-                <p className="text-xs text-slate-300 leading-relaxed font-normal">
-                  Every trade is protected with our buyer protection policy and verified user profiles.
-                </p>
-              </div>
-
-              <div className="bg-white/5 backdrop-blur-xl p-6 rounded-3xl border border-white/10 space-y-3">
-                <div className="w-12 h-12 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold">
-                  <Zap size={24} />
-                </div>
-                <h3 className="font-bold text-base text-white">Direct Liquidity</h3>
-                <p className="text-xs text-slate-300 leading-relaxed font-normal">
-                  Turn unused clutter in your home into instant cash with free 60-second ad posting.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ============================================================
-          6. TRUSTED SELLERS SHOWCASE
-          ============================================================ */}
-      <section className="py-20 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-xl mx-auto mb-16">
-            <span className="text-xs font-extrabold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3.5 py-1.5 rounded-full border border-indigo-100">
-              Verified Merchants
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mt-2 tracking-tight">
-              Top-Rated Trusted Sellers
-            </h2>
-            <p className="text-slate-500 text-xs sm:text-sm mt-1">
-              Experienced traders with 4.8+ ratings and hundreds of successful transactions.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {TRUSTED_SELLERS.map((seller) => (
-              <div
-                key={seller.id}
-                className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-xl hover:border-indigo-300 transition-all text-center space-y-4 flex flex-col justify-between group"
-              >
-                <div>
-                  <div className="relative w-20 h-20 mx-auto mb-3">
-                    <img
-                      src={seller.img}
-                      alt={seller.name}
-                      className="w-full h-full rounded-2xl object-cover border-2 border-indigo-500 shadow-md"
-                    />
-                    <span className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold border-2 border-white shadow-xs">
-                      ✓
-                    </span>
+                {[
+                  { title: "Real-time Live Chat", desc: "Instant negotiations & audio/image sharing" },
+                  { title: "Instant bKash Checkout", desc: "1-tap escrow deposits & cashouts" },
+                  { title: "Price Drop Alerter", desc: "Get notified when saved items reduce price" },
+                  { title: "GPS Radius Search", desc: "Discover verified items in your neighborhood" },
+                ].map((item) => (
+                  <div key={item.title} className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
+                    <h4 className="text-xs sm:text-sm font-black text-indigo-300 mb-1">{item.title}</h4>
+                    <p className="text-[11px] text-slate-400 leading-tight">{item.desc}</p>
                   </div>
+                ))}
+              </div>
 
-                  <h3 className="font-black text-slate-900 text-base group-hover:text-indigo-600 transition-colors">
-                    {seller.name}
-                  </h3>
-                  <span className="text-xs text-indigo-600 font-bold block">{seller.handle}</span>
-
-                  <div className="flex items-center justify-center gap-1 text-xs text-amber-500 font-bold mt-2">
-                    <Star size={13} fill="#f59e0b" />
-                    <span>{seller.rating}</span>
-                    <span className="text-slate-400 font-normal">({seller.reviews} reviews)</span>
-                  </div>
-
-                  <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100 text-left text-xs space-y-1 mt-4">
-                    <div className="flex justify-between text-slate-500">
-                      <span>Volume:</span>
-                      <strong className="text-slate-800 font-bold">{seller.sales}</strong>
-                    </div>
-                    <div className="flex justify-between text-slate-500">
-                      <span>Location:</span>
-                      <strong className="text-slate-800 font-bold">{seller.city}</strong>
-                    </div>
-                  </div>
-                </div>
-
+              <div className="flex flex-wrap gap-4 pt-4">
+                <Link
+                  href="/add-product"
+                  className="btn-shiny-primary px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-wider shadow-xl"
+                >
+                  Start Selling in 60 Seconds
+                </Link>
                 <Link
                   href="/listings"
-                  className="w-full py-2.5 bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-600 font-bold text-xs rounded-xl transition-all block text-center"
+                  className="px-8 py-4 rounded-2xl font-bold text-xs bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md transition-all text-white"
                 >
-                  View Seller Listings
+                  Browse Marketplace
                 </Link>
               </div>
-            ))}
+            </div>
+
+            <div className="lg:col-span-6 flex justify-center">
+              {/* Modern Showcase Card */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                className="w-full max-w-md p-8 rounded-3xl bg-slate-900/90 border border-slate-700/80 shadow-2xl backdrop-blur-2xl relative"
+              >
+                <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-black">
+                      <ShieldCheck size={22} />
+                    </div>
+                    <div>
+                      <div className="text-xs font-black text-white">ReSell Hub Shield™</div>
+                      <div className="text-[10px] text-emerald-400 font-bold">● Active Escrow Protection</div>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-black uppercase text-indigo-300 bg-indigo-950 px-2.5 py-1 rounded-md border border-indigo-800">
+                    Live Verified
+                  </span>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src="https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=100&auto=format&fit=crop&q=80"
+                        alt="Product"
+                        className="w-12 h-12 rounded-xl object-cover"
+                      />
+                      <div>
+                        <div className="text-xs font-black text-white">iPhone 15 Pro 128GB</div>
+                        <div className="text-[10px] text-slate-400">Buyer: Tanzid H. (Gulshan)</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs font-black text-emerald-400">৳94,000</div>
+                      <div className="text-[9px] text-slate-400">In Escrow Vault</div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-slate-800/80 border border-slate-700 text-xs space-y-2">
+                    <div className="flex justify-between text-slate-300">
+                      <span>Courier Dispatch:</span>
+                      <strong className="text-emerald-400 font-bold">SteadFast Express #SF-9842</strong>
+                    </div>
+                    <div className="flex justify-between text-slate-300">
+                      <span>Inspection Window:</span>
+                      <strong className="text-cyan-400 font-bold">48 Hours Remaining</strong>
+                    </div>
+                    <div className="w-full bg-slate-700 h-2 rounded-full overflow-hidden mt-1">
+                      <div className="bg-gradient-to-r from-indigo-500 to-emerald-400 h-full w-3/4" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-slate-800 text-center">
+                  <span className="text-[11px] text-slate-400">
+                    🔒 Protected by 256-bit SSL Escrow encryption
+                  </span>
+                </div>
+              </motion.div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* ============================================================
-          7. SUCCESS STORIES (BUYER & SELLER EXPERIENCES)
+          8. FREQUENTLY ASKED QUESTIONS (FAQ ACCORDION)
           ============================================================ */}
-      <section className="py-20 bg-white border-t border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-xl mx-auto mb-16">
-            <span className="text-xs font-extrabold text-emerald-600 uppercase tracking-widest bg-emerald-50 px-3.5 py-1.5 rounded-full border border-emerald-100">
-              Community Voices
+      <section className="py-24 bg-slate-50 border-t border-slate-200">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <span className="text-xs font-extrabold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3.5 py-1.5 rounded-full border border-indigo-100">
+              Clear & Transparent
             </span>
             <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mt-2 tracking-tight">
-              Real Trader Success Stories
+              Frequently Asked Questions
             </h2>
-            <p className="text-slate-500 text-xs sm:text-sm mt-1">
-              Read how buyers and sellers across Bangladesh save and earn with ReSell Hub.
+            <p className="text-slate-500 text-xs sm:text-sm mt-2">
+              Everything you need to know about buying, selling, and escrow protection on ReSell Hub.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {SUCCESS_STORIES.map((story, i) => (
-              <motion.div
-                key={story.name}
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="bg-slate-50 p-8 rounded-3xl border border-slate-200/90 shadow-sm flex flex-col justify-between"
+          <div className="space-y-4">
+            {[
+              {
+                q: "How does the Escrow Payment system protect me?",
+                a: "When you buy an item, your money is held securely in our Escrow Vault instead of going directly to the seller. The seller only receives the payout after you receive the item, test it during the 48-hour inspection window, and confirm it matches the description.",
+              },
+              {
+                q: "What if the item I receive is broken or counterfeit?",
+                a: "If the item is not as described, simply click 'Report Issue' in your order dashboard within 48 hours. Our dispute team will freeze the funds, provide a prepaid return courier slip, and issue a 100% full refund once returned.",
+              },
+              {
+                q: "How quickly do sellers receive their money?",
+                a: "Once the buyer confirms receipt or the 48-hour inspection window passes without dispute, funds are automatically transferred directly to your bKash, Nagad, or bank account within 30 seconds.",
+              },
+              {
+                q: "How does nationwide courier delivery work?",
+                a: "Once an item is ordered, a RedX or SteadFast courier will arrive at the seller's doorstep to pick up the parcel. Both buyer and seller receive live SMS and in-app tracking across all 64 districts in Bangladesh.",
+              },
+              {
+                q: "Is there any fee to post an ad for sale?",
+                a: "No! Posting ads on ReSell Hub is 100% free for standard listings. We only take a nominal escrow processing fee when an item successfully sells.",
+              },
+            ].map((faq, idx) => (
+              <details
+                key={faq.q}
+                className="group bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs open:shadow-md transition-all cursor-pointer"
               >
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex gap-1 text-amber-400">
-                      {[...Array(story.stars)].map((_, idx) => (
-                        <Star key={idx} size={15} fill="#fbbf24" stroke="#fbbf24" />
-                      ))}
-                    </div>
-                    <span className="text-[11px] font-black text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200">
-                      {story.price}
-                    </span>
-                  </div>
-
-                  <p className="text-slate-700 text-sm leading-relaxed italic mb-6">
-                    &ldquo;{story.quote}&rdquo;
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-3.5 pt-4 border-t border-slate-200/60">
-                  <img
-                    src={story.avatar}
-                    alt={story.name}
-                    className="w-11 h-11 rounded-2xl object-cover border border-slate-200"
-                  />
-                  <div>
-                    <h4 className="font-black text-xs text-slate-900">{story.name}</h4>
-                    <span className="text-[11px] text-slate-500 font-medium block">{story.role}</span>
-                    <span className="text-[10px] text-indigo-600 font-bold block">{story.itemTraded}</span>
-                  </div>
-                </div>
-              </motion.div>
+                <summary className="font-black text-slate-900 text-sm sm:text-base flex items-center justify-between list-none">
+                  <span>{faq.q}</span>
+                  <ChevronRight size={18} className="text-indigo-600 group-open:rotate-90 transition-transform shrink-0 ml-2" />
+                </summary>
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mt-4 pt-4 border-t border-slate-100 font-normal">
+                  {faq.a}
+                </p>
+              </details>
             ))}
           </div>
         </div>
       </section>
 
       {/* ============================================================
-          8. HIGH-IMPACT FINAL CTA BANNER
+          9. ULTRA-LUXURY VIP CLUB & HIGH-CONVERTING FINAL CTA
           ============================================================ */}
-      <section className="py-20 bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 text-white text-center">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <span className="text-xs font-black tracking-widest uppercase bg-white/10 px-4 py-1.5 rounded-full border border-white/20">
-            0% Commission on First 3 Listings
+      <section className="py-24 bg-gradient-to-r from-indigo-900 via-slate-900 to-purple-950 text-white relative overflow-hidden text-center">
+        <div className="absolute top-0 right-0 w-[500px] h-[300px] bg-indigo-500/20 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[300px] bg-emerald-500/15 rounded-full blur-[120px] pointer-events-none" />
+
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 relative z-10">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-xs font-black uppercase tracking-widest text-amber-300 mb-6 shadow-inner">
+            <Sparkles size={14} className="text-amber-400 animate-spin" /> VIP Trader Access — 0% Commission on First 3 Sales
           </span>
-          <h2 className="text-3xl sm:text-5xl font-black mt-4 mb-4 tracking-tight">
-            Ready to turn pre-loved items into cash?
+
+          <h2 className="text-3xl sm:text-5xl font-black mt-2 mb-6 tracking-tight leading-tight">
+            Turn Your Unused Tech & Valuables Into <span className="bg-clip-text text-transparent bg-gradient-to-r from-amber-300 via-emerald-300 to-cyan-300">Instant Cash</span>
           </h2>
-          <p className="text-indigo-100 max-w-xl mx-auto mb-8 text-sm sm:text-base leading-relaxed">
-            Create an ad in less than 60 seconds. Reach thousands of eager buyers in Dhaka, Chittagong, Sylhet, and nationwide.
+
+          <p className="text-slate-300 max-w-xl mx-auto mb-10 text-sm sm:text-base leading-relaxed font-normal">
+            Join over 50,000 verified buyers and sellers across Bangladesh. List your first product in 60 seconds with 100% Escrow Protection.
           </p>
+
           <div className="flex flex-wrap justify-center gap-4">
             <Link
               href="/add-product"
-              className="btn-shiny-amber px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-wider shadow-2xl"
+              className="btn-shiny-amber px-10 py-4 rounded-2xl font-black text-sm uppercase tracking-wider shadow-2xl hover:scale-105 transition-transform"
             >
               Post an Item for Sale Free
             </Link>
             <Link
               href="/listings"
-              className="px-8 py-4 rounded-2xl font-bold text-sm bg-white/10 hover:bg-white/20 border border-white/30 backdrop-blur-md transition-all"
+              className="px-10 py-4 rounded-2xl font-bold text-sm bg-white/10 hover:bg-white/20 border border-white/25 backdrop-blur-xl transition-all text-white"
             >
               Explore All Listings
             </Link>
