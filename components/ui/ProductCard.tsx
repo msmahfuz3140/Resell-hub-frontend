@@ -119,11 +119,10 @@ export default function ProductCard({
             <button
               type="button"
               onClick={handleCompareClick}
-              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 shadow-md ${
-                isCompared
+              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 shadow-md ${isCompared
                   ? "bg-indigo-600 text-white scale-105 ring-2 ring-indigo-300 dark:ring-indigo-700"
                   : "bg-white/90 dark:bg-slate-900/90 backdrop-blur-md text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:scale-105"
-              }`}
+                }`}
               title={isCompared ? "Remove from comparison" : "Add to comparison"}
               aria-label="Compare item"
             >
@@ -134,11 +133,10 @@ export default function ProductCard({
             <button
               type="button"
               onClick={handleFavClick}
-              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 shadow-md ${
-                fav
+              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 shadow-md ${fav
                   ? "bg-rose-500 text-white scale-105"
                   : "bg-white/90 dark:bg-slate-900/90 backdrop-blur-md text-slate-600 dark:text-slate-300 hover:text-rose-500 hover:scale-105"
-              }`}
+                }`}
               aria-label="Save item"
             >
               <Heart size={16} className={fav ? "fill-white" : ""} />

@@ -412,20 +412,20 @@ function ListingsContent() {
     search || selectedCategory !== "All" || selectedCondition !== "All" || priceMax < 250000;
 
   return (
-    <div className="bg-slate-50 min-h-screen py-10">
+    <div className="bg-slate-50 dark:bg-slate-950 min-h-screen py-10 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Top Title & Quick Filters */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-black uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
+              <span className="text-xs font-black uppercase tracking-wider text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-3 py-1 rounded-full border border-indigo-100 dark:border-indigo-800/60">
                 Live Feed
               </span>
-              <span className="text-xs text-slate-400 font-medium">
+              <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">
                 {isLoading ? "Loading..." : `${meta.total.toLocaleString()} listings`}
               </span>
             </div>
-            <h1 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight mt-1">
+            <h1 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mt-1">
               Marketplace Listings
             </h1>
           </div>
@@ -433,11 +433,11 @@ function ListingsContent() {
           {/* Sort selector */}
           <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
             <ArrowUpDown size={15} className="text-slate-400 hidden sm:block shrink-0" />
-            <span className="text-xs text-slate-400 font-bold hidden sm:inline shrink-0">Sort:</span>
+            <span className="text-xs text-slate-400 dark:text-slate-500 font-bold hidden sm:inline shrink-0">Sort:</span>
             <select
               value={sortBy}
               onChange={(e) => { setSortBy(e.target.value); setPage(1); }}
-              className="text-xs font-bold bg-white text-slate-700 py-2.5 px-3 sm:px-4 rounded-xl border border-slate-200 shadow-xs outline-none cursor-pointer focus:border-indigo-400 transition-colors w-full sm:w-auto"
+              className="text-xs font-bold bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 py-2.5 px-3 sm:px-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs outline-none cursor-pointer focus:border-indigo-400 transition-colors w-full sm:w-auto"
             >
               {SORT_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -447,16 +447,16 @@ function ListingsContent() {
         </div>
 
         {/* Search & Category Pill Bar */}
-        <div className="bg-white p-3 sm:p-4 rounded-3xl border border-slate-200/80 shadow-sm mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
           {/* Search box */}
           <div className="relative w-full md:w-96">
-            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name, category, or keyword..."
-              className="w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-semibold text-slate-800 outline-none focus:border-indigo-500 focus:bg-white transition-all"
+              className="w-full pl-11 pr-10 py-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-semibold text-slate-800 dark:text-white outline-none focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-800 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
             />
             {search && (
               <button
@@ -473,11 +473,10 @@ function ListingsContent() {
           <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 scrollbar-none">
             <button
               onClick={() => { setSelectedCategory("All"); setPage(1); }}
-              className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-                selectedCategory === "All"
-                  ? "bg-slate-900 text-white shadow-sm"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-              }`}
+              className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${selectedCategory === "All"
+                  ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                }`}
             >
               All Categories
             </button>
@@ -485,11 +484,10 @@ function ListingsContent() {
               <button
                 key={c.id}
                 onClick={() => { setSelectedCategory(c.id); setPage(1); }}
-                className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-                  selectedCategory === c.id
+                className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${selectedCategory === c.id
                     ? "bg-indigo-600 text-white shadow-sm"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                }`}
+                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                  }`}
               >
                 {c.icon} {c.label}
               </button>
@@ -499,11 +497,10 @@ function ListingsContent() {
           {/* Mobile Filter Button */}
           <button
             onClick={() => setShowMobileFilter(!showMobileFilter)}
-            className={`md:hidden w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-xs font-black border transition-all ${
-              hasActiveFilters
+            className={`md:hidden w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-xs font-black border transition-all ${hasActiveFilters
                 ? "bg-indigo-600 text-white border-indigo-600"
-                : "bg-indigo-50 text-indigo-600 border-indigo-100"
-            }`}
+                : "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border-indigo-100 dark:border-indigo-800/60"
+              }`}
           >
             <Filter size={15} />
             <span>Filters {hasActiveFilters ? "(active)" : ""}</span>
@@ -539,7 +536,7 @@ function ListingsContent() {
             )}
             <button
               onClick={resetFilters}
-              className="flex items-center gap-1 text-xs font-bold text-slate-500 hover:text-rose-600 px-3 py-1.5 rounded-full bg-slate-100 hover:bg-rose-50 transition-all"
+              className="flex items-center gap-1 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-all"
             >
               <RotateCcw size={12} /> Clear all
             </button>
@@ -550,15 +547,15 @@ function ListingsContent() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           {/* Sidebar Filters */}
           <div className={`md:col-span-4 lg:col-span-3 ${showMobileFilter ? "block" : "hidden md:block"} space-y-6`}>
-            <div className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-sm space-y-6 sticky top-24">
-              <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-                <span className="font-extrabold text-slate-900 text-sm flex items-center gap-2">
-                  <SlidersHorizontal size={16} className="text-indigo-600" /> Filter Criteria
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-sm space-y-6 sticky top-24">
+              <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+                <span className="font-extrabold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+                  <SlidersHorizontal size={16} className="text-indigo-600 dark:text-indigo-400" /> Filter Criteria
                 </span>
                 {hasActiveFilters && (
                   <button
                     onClick={resetFilters}
-                    className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+                    className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 flex items-center gap-1"
                   >
                     <RotateCcw size={12} /> Reset
                   </button>
@@ -567,9 +564,9 @@ function ListingsContent() {
 
               {/* Category */}
               <div>
-                <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400 mb-3">Categories</h4>
+                <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-3">Categories</h4>
                 <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
-                  <label className="flex items-center gap-2.5 text-xs font-semibold text-slate-700 cursor-pointer hover:text-indigo-600">
+                  <label className="flex items-center gap-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400">
                     <input
                       type="radio"
                       name="category"
@@ -580,7 +577,7 @@ function ListingsContent() {
                     All Items
                   </label>
                   {CATEGORIES.map((cat) => (
-                    <label key={cat.id} className="flex items-center gap-2.5 text-xs font-medium text-slate-700 cursor-pointer hover:text-indigo-600">
+                    <label key={cat.id} className="flex items-center gap-2.5 text-xs font-medium text-slate-700 dark:text-slate-300 cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400">
                       <input
                         type="radio"
                         name="category"
@@ -596,18 +593,17 @@ function ListingsContent() {
 
               {/* Condition */}
               <div>
-                <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400 mb-3">Condition</h4>
+                <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-3">Condition</h4>
                 <div className="flex flex-wrap gap-1.5">
                   {CONDITIONS.map((cond) => (
                     <button
                       key={cond}
                       type="button"
                       onClick={() => { setSelectedCondition(cond); setPage(1); }}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                        selectedCondition === cond
-                          ? "bg-slate-900 text-white shadow-xs"
-                          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                      }`}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${selectedCondition === cond
+                          ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-xs"
+                          : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                        }`}
                     >
                       {cond}
                     </button>
@@ -617,16 +613,16 @@ function ListingsContent() {
 
               {/* Location */}
               <div>
-                <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400 mb-3">Location</h4>
+                <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-3">Location</h4>
                 <LocationSelector value={selectedCity} onChange={setSelectedCity} className="w-full" />
               </div>
 
               {/* Price Range (Min - Max & Quick Chips) */}
               <div>
-                <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400 mb-3">Price Range (BDT)</h4>
+                <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-3">Price Range (BDT)</h4>
                 <div className="grid grid-cols-2 gap-2 mb-3">
                   <div>
-                    <label className="text-[10px] font-bold text-slate-400 block mb-1">Min Price</label>
+                    <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 block mb-1">Min Price</label>
                     <input
                       type="number"
                       placeholder="0"
@@ -637,7 +633,7 @@ function ListingsContent() {
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] font-bold text-slate-400 block mb-1">Max Price</label>
+                    <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 block mb-1">Max Price</label>
                     <input
                       type="number"
                       placeholder="250000"
@@ -665,11 +661,10 @@ function ListingsContent() {
                         setPriceMax(chip.max);
                         setPage(1);
                       }}
-                      className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
-                        priceMin === chip.min && priceMax === chip.max
+                      className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all ${priceMin === chip.min && priceMax === chip.max
                           ? "bg-indigo-600 text-white"
                           : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
-                      }`}
+                        }`}
                     >
                       {chip.label}
                     </button>

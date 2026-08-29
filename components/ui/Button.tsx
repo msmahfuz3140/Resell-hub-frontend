@@ -51,9 +51,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           sizeStyles[size],
           fullWidth && "w-full",
           variant === "danger" &&
-            "bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/25",
+          "bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/25",
           variant === "outline" &&
-            "border-2 border-[var(--color-primary)] text-[var(--color-primary)] bg-transparent hover:bg-[var(--color-primary)] hover:text-white",
+          "border-2 border-[var(--color-primary)] text-[var(--color-primary)] bg-transparent hover:bg-[var(--color-primary)] hover:text-white",
           className
         )}
         disabled={disabled || isLoading}

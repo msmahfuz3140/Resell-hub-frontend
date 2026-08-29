@@ -58,11 +58,10 @@ export default function Pagination({ page, totalPages, total, limit, onPageChang
             <button
               key={p}
               onClick={() => onPageChange(p as number)}
-              className={`w-9 h-9 rounded-xl text-xs font-black transition-all ${
-                p === page
+              className={`w-9 h-9 rounded-xl text-xs font-black transition-all ${p === page
                   ? "bg-indigo-600 text-white shadow-md shadow-indigo-200"
                   : "bg-white border border-slate-200 text-slate-600 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-600"
-              }`}
+                }`}
             >
               {p}
             </button>

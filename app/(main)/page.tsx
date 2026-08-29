@@ -134,14 +134,14 @@ export default function HomePage() {
     : featuredOnly.filter((p) => p.category?.toLowerCase() === activeCategoryTab.toLowerCase())).slice(0, 4);
 
   return (
-    <div className="min-h-screen bg-slate-50 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 overflow-x-hidden transition-colors duration-300">
       {/* ============================================================
           1. HERO BANNER WITH AMBIENT 3D LIGHTING & RESPONSIVE SEARCH
           ============================================================ */}
-      <section className="relative pt-10 pb-16 sm:pt-16 sm:pb-24 lg:pt-20 lg:pb-32 overflow-hidden bg-[#090D16] text-white">
+      <section className="relative pt-10 pb-16 sm:pt-16 sm:pb-24 lg:pt-20 lg:pb-32 overflow-hidden bg-gradient-to-b from-indigo-50/80 via-slate-50 to-white dark:from-[#090D16] dark:via-[#0B1120] dark:to-slate-950 text-slate-900 dark:text-white transition-colors duration-300">
         {/* Glow Spheres */}
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[350px] sm:w-[600px] lg:w-[750px] h-[300px] sm:h-[500px] bg-gradient-to-tr from-indigo-600/30 via-purple-600/25 to-cyan-500/20 rounded-full blur-[90px] sm:blur-[130px] pointer-events-none" />
-        <div className="absolute top-1/2 -right-48 w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] bg-amber-500/15 rounded-full blur-[80px] pointer-events-none" />
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[350px] sm:w-[600px] lg:w-[750px] h-[300px] sm:h-[500px] bg-gradient-to-tr from-indigo-600/15 via-purple-600/10 to-cyan-500/10 dark:from-indigo-600/30 dark:via-purple-600/25 dark:to-cyan-500/20 rounded-full blur-[90px] sm:blur-[130px] pointer-events-none" />
+        <div className="absolute top-1/2 -right-48 w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] bg-amber-500/10 dark:bg-amber-500/15 rounded-full blur-[80px] pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
@@ -150,10 +150,10 @@ export default function HomePage() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 backdrop-blur-xl mb-6 sm:mb-8 shadow-inner"
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-100/80 dark:bg-white/10 border border-indigo-200/60 dark:border-white/15 backdrop-blur-xl mb-6 sm:mb-8 shadow-inner"
             >
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              <span className="text-[11px] sm:text-xs font-extrabold text-indigo-200 tracking-wide">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-ping" />
+              <span className="text-[11px] sm:text-xs font-extrabold text-indigo-600 dark:text-indigo-200 tracking-wide">
                 Bangladesh&apos;s #1 Escrow-Protected Marketplace
               </span>
             </motion.div>
@@ -163,10 +163,10 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.12] sm:leading-[1.08] mb-4 sm:mb-6"
+              className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.12] sm:leading-[1.08] mb-4 sm:mb-6 text-slate-900 dark:text-white"
             >
               The Modern Way to <br className="hidden sm:inline" />
-              <span className="bg-gradient-to-r from-indigo-400 via-purple-300 to-cyan-300 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-indigo-600 via-purple-500 to-cyan-500 dark:from-indigo-400 dark:via-purple-300 dark:to-cyan-300 bg-clip-text text-transparent">
                 Buy & Sell Second-Hand.
               </span>
             </motion.h1>
@@ -176,7 +176,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-sm sm:text-base lg:text-xl text-slate-300 max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed font-normal px-2"
+              className="text-sm sm:text-base lg:text-xl text-slate-500 dark:text-slate-300 max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed font-normal px-2"
             >
               Join 25,000+ verified users trading genuine smartphones, laptops, vehicles, and furniture safely without middleman cuts.
             </motion.p>
@@ -186,17 +186,17 @@ export default function HomePage() {
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="max-w-3xl mx-auto bg-white/95 backdrop-blur-2xl p-2.5 sm:p-3.5 rounded-2xl sm:rounded-3xl shadow-2xl shadow-indigo-950/80 border border-white/40 text-slate-800"
+              className="max-w-3xl mx-auto bg-white/95 dark:bg-slate-900/90 backdrop-blur-2xl p-2.5 sm:p-3.5 rounded-2xl sm:rounded-3xl shadow-2xl shadow-indigo-500/10 dark:shadow-indigo-950/80 border border-slate-200/60 dark:border-slate-700/60 text-slate-800 dark:text-white"
             >
               <form onSubmit={handleSearch} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                <div className="flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 w-full sm:flex-1 bg-slate-50/90 rounded-xl sm:rounded-2xl border border-slate-200/80 focus-within:border-indigo-500 focus-within:bg-white transition-all">
-                  <Search size={18} className="text-indigo-600 shrink-0" />
+                <div className="flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 w-full sm:flex-1 bg-slate-50/90 dark:bg-slate-800/80 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-700/60 focus-within:border-indigo-500 focus-within:bg-white dark:focus-within:bg-slate-800 transition-all">
+                  <Search size={18} className="text-indigo-600 dark:text-indigo-400 shrink-0" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search iPhone 15, MacBook M2, Yamaha..."
-                    className="w-full bg-transparent text-xs sm:text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400 placeholder:font-normal"
+                    className="w-full bg-transparent text-xs sm:text-sm font-semibold text-slate-800 dark:text-white outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500 placeholder:font-normal"
                   />
                 </div>
 
@@ -242,46 +242,46 @@ export default function HomePage() {
       {/* ============================================================
           2. DYNAMIC MARKETPLACE STATISTICS TICKER
           ============================================================ */}
-      <section className="bg-white border-b border-slate-200/80 py-6 sm:py-10 shadow-xs">
+      <section className="bg-white dark:bg-slate-900 border-b border-slate-200/80 dark:border-slate-800 py-6 sm:py-10 shadow-xs transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-            <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-slate-50/80 border border-slate-100 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black shrink-0 shadow-xs">
+            <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black shrink-0 shadow-xs">
                 <Package className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
-                <span className="text-xl sm:text-3xl font-black text-slate-900 tracking-tight block">50,000+</span>
-                <span className="text-[10px] sm:text-xs font-extrabold text-slate-500 uppercase tracking-wider">Total Products</span>
+                <span className="text-xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight block">50,000+</span>
+                <span className="text-[10px] sm:text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Products</span>
               </div>
             </div>
 
-            <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-slate-50/80 border border-slate-100 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black shrink-0 shadow-xs">
+            <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black shrink-0 shadow-xs">
                 <Users className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
-                <span className="text-xl sm:text-3xl font-black text-slate-900 tracking-tight block">8,500+</span>
-                <span className="text-[10px] sm:text-xs font-extrabold text-slate-500 uppercase tracking-wider">Verified Sellers</span>
+                <span className="text-xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight block">8,500+</span>
+                <span className="text-[10px] sm:text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Verified Sellers</span>
               </div>
             </div>
 
-            <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-slate-50/80 border border-slate-100 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-black shrink-0 shadow-xs">
+            <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center font-black shrink-0 shadow-xs">
                 <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
-                <span className="text-xl sm:text-3xl font-black text-slate-900 tracking-tight block">25,000+</span>
-                <span className="text-[10px] sm:text-xs font-extrabold text-slate-500 uppercase tracking-wider">Active Buyers</span>
+                <span className="text-xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight block">25,000+</span>
+                <span className="text-[10px] sm:text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Active Buyers</span>
               </div>
             </div>
 
-            <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-slate-50/80 border border-slate-100 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-black shrink-0 shadow-xs">
+            <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center font-black shrink-0 shadow-xs">
                 <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
-                <span className="text-xl sm:text-3xl font-black text-slate-900 tracking-tight block">38,000+</span>
-                <span className="text-[10px] sm:text-xs font-extrabold text-slate-500 uppercase tracking-wider">Completed Orders</span>
+                <span className="text-xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight block">38,000+</span>
+                <span className="text-[10px] sm:text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Completed Orders</span>
               </div>
             </div>
           </div>
@@ -291,20 +291,20 @@ export default function HomePage() {
       {/* ============================================================
           3. POPULAR DYNAMIC CATEGORIES
           ============================================================ */}
-      <section className="py-12 sm:py-20 bg-slate-50">
+      <section className="py-12 sm:py-20 bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-12 gap-4">
             <div>
-              <span className="text-[10px] sm:text-xs font-extrabold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full border border-indigo-100">
+              <span className="text-[10px] sm:text-xs font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest bg-indigo-50 dark:bg-indigo-950/60 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full border border-indigo-100 dark:border-indigo-800/60">
                 Popular Categories
               </span>
-              <h2 className="text-2xl sm:text-4xl font-black text-slate-900 mt-2 tracking-tight">
+              <h2 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white mt-2 tracking-tight">
                 Discover by Category
               </h2>
             </div>
             <Link
               href="/categories"
-              className="text-xs font-black text-indigo-600 hover:text-indigo-800 flex items-center gap-1.5 group bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-xs w-fit"
+              className="text-xs font-black text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 flex items-center gap-1.5 group bg-white dark:bg-slate-900 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs w-fit"
             >
               <span>View All 12 Categories</span>
               <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
@@ -318,18 +318,18 @@ export default function HomePage() {
                 <Link
                   key={cat.name}
                   href={`/listings?category=${cat.id}`}
-                  className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-xl hover:border-indigo-300 transition-all duration-300 flex flex-col items-center text-center group relative overflow-hidden"
+                  className="bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-indigo-300 dark:hover:border-indigo-700 transition-all duration-300 flex flex-col items-center text-center group relative overflow-hidden"
                 >
                   <div
                     className={`w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-gradient-to-br ${cat.gradient} text-white flex items-center justify-center shadow-md mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300`}
                   >
                     <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
-                  <h3 className="font-bold text-slate-900 text-xs sm:text-sm group-hover:text-indigo-600 transition-colors line-clamp-1">
+                  <h3 className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-1">
                     {cat.name}
                   </h3>
-                  <span className="text-[10px] sm:text-[11px] font-semibold text-slate-400 mt-0.5 sm:mt-1">{cat.count}</span>
-                  <span className="text-[9px] sm:text-[10px] text-slate-400/80 mt-0.5 truncate max-w-[110px] hidden sm:block">{cat.popularSub}</span>
+                  <span className="text-[10px] sm:text-[11px] font-semibold text-slate-400 dark:text-slate-500 mt-0.5 sm:mt-1">{cat.count}</span>
+                  <span className="text-[9px] sm:text-[10px] text-slate-400/80 dark:text-slate-500/80 mt-0.5 truncate max-w-[110px] hidden sm:block">{cat.popularSub}</span>
                 </Link>
               );
             })}
@@ -340,17 +340,17 @@ export default function HomePage() {
       {/* ============================================================
           4. DYNAMIC FEATURED PRODUCTS (WITH LIVE FILTER TABS)
           ============================================================ */}
-      <section className="py-12 sm:py-20 bg-white border-y border-slate-200/80">
+      <section className="py-12 sm:py-20 bg-white dark:bg-slate-900/50 border-y border-slate-200/80 dark:border-slate-800 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-10 gap-4 sm:gap-6">
             <div>
               <div className="flex items-center gap-2">
-                <span className="flex items-center gap-1 text-[10px] sm:text-xs font-black text-amber-700 bg-amber-50 px-2.5 sm:px-3 py-1 rounded-full border border-amber-200">
-                  <Flame size={13} className="text-amber-500" /> Hot Picks
+                <span className="flex items-center gap-1 text-[10px] sm:text-xs font-black text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/50 px-2.5 sm:px-3 py-1 rounded-full border border-amber-200 dark:border-amber-800/60">
+                  <Flame size={13} className="text-amber-500 dark:text-amber-400" /> Hot Picks
                 </span>
-                <span className="text-[11px] sm:text-xs text-slate-400 font-medium">100% Genuine Verified</span>
+                <span className="text-[11px] sm:text-xs text-slate-400 dark:text-slate-500 font-medium">100% Genuine Verified</span>
               </div>
-              <h2 className="text-2xl sm:text-4xl font-black text-slate-900 mt-2 tracking-tight">
+              <h2 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white mt-2 tracking-tight">
                 Featured Verified Listings
               </h2>
             </div>
@@ -362,11 +362,10 @@ export default function HomePage() {
                   key={tab}
                   type="button"
                   onClick={() => setActiveCategoryTab(tab)}
-                  className={`px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-black shrink-0 transition-all ${
-                    activeCategoryTab === tab
-                      ? "bg-slate-900 text-white shadow-sm"
-                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                  }`}
+                  className={`px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-black shrink-0 transition-all ${activeCategoryTab === tab
+                      ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm"
+                      : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                    }`}
                 >
                   {tab === "All" ? "All Items" : tab}
                 </button>
@@ -378,7 +377,7 @@ export default function HomePage() {
           {loadingProducts ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-80 bg-slate-100 rounded-2xl sm:rounded-3xl animate-pulse" />
+                <div key={i} className="h-80 bg-slate-100 dark:bg-slate-800 rounded-2xl sm:rounded-3xl animate-pulse" />
               ))}
             </div>
           ) : filteredFeatured.length > 0 ? (
@@ -388,10 +387,10 @@ export default function HomePage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-16 bg-slate-50 rounded-2xl sm:rounded-3xl border border-slate-200">
-              <ShoppingBag size={36} className="mx-auto text-slate-300 mb-3" />
-              <h3 className="text-base font-bold text-slate-700">No featured products found</h3>
-              <p className="text-xs text-slate-400 mt-1">Browse all available listings from the marketplace.</p>
+            <div className="text-center py-16 bg-slate-50 dark:bg-slate-800/50 rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-800">
+              <ShoppingBag size={36} className="mx-auto text-slate-300 dark:text-slate-600 mb-3" />
+              <h3 className="text-base font-bold text-slate-700 dark:text-slate-200">No featured products found</h3>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Browse all available listings from the marketplace.</p>
               <Link href="/listings" className="mt-4 inline-block btn-shiny-primary px-5 py-2 rounded-xl text-xs font-black uppercase">
                 View All Listings
               </Link>
@@ -524,33 +523,33 @@ export default function HomePage() {
       {/* ============================================================
           6. COMPARISON MATRIX (RESELL HUB VS TRADITIONAL CLASSIFIEDS)
           ============================================================ */}
-      <section className="py-16 sm:py-24 bg-white border-y border-slate-200">
+      <section className="py-16 sm:py-24 bg-white dark:bg-slate-900/50 border-y border-slate-200 dark:border-slate-800 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-16">
-            <span className="text-[10px] sm:text-xs font-extrabold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3.5 py-1.5 rounded-full border border-indigo-100">
+            <span className="text-[10px] sm:text-xs font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest bg-indigo-50 dark:bg-indigo-950/60 px-3.5 py-1.5 rounded-full border border-indigo-100 dark:border-indigo-800/60">
               Why We Are Different
             </span>
-            <h2 className="text-2xl sm:text-4xl font-black text-slate-900 mt-2 tracking-tight">
+            <h2 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white mt-2 tracking-tight">
               Why 50,000+ Bangladeshis Choose ReSell Hub
             </h2>
-            <p className="text-slate-500 text-xs sm:text-sm mt-2">
+            <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-2">
               Say goodbye to dangerous stranger meetups, fake payment screenshots, and zero return policies.
             </p>
           </div>
 
           {/* Mobile Swipe Hint */}
-          <div className="md:hidden flex items-center justify-center gap-1.5 text-[11px] font-bold text-indigo-600 bg-indigo-50 py-1 px-3 rounded-full mb-3 w-fit mx-auto">
+          <div className="md:hidden flex items-center justify-center gap-1.5 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 py-1 px-3 rounded-full mb-3 w-fit mx-auto">
             <span>← Swipe horizontally to see comparison →</span>
           </div>
 
-          <div className="overflow-x-auto rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm">
-            <div className="min-w-[620px] bg-slate-50 p-5 sm:p-8">
-              <div className="grid grid-cols-12 pb-3.5 border-b border-slate-200 text-xs font-black text-slate-400 uppercase tracking-wider">
+          <div className="overflow-x-auto rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div className="min-w-[620px] bg-slate-50 dark:bg-slate-900 p-5 sm:p-8">
+              <div className="grid grid-cols-12 pb-3.5 border-b border-slate-200 dark:border-slate-800 text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 <div className="col-span-6">Marketplace Feature</div>
-                <div className="col-span-3 text-center text-indigo-600 font-extrabold flex items-center justify-center gap-1">
+                <div className="col-span-3 text-center text-indigo-600 dark:text-indigo-400 font-extrabold flex items-center justify-center gap-1">
                   <Sparkles size={14} /> ReSell Hub
                 </div>
-                <div className="col-span-3 text-center text-slate-400 font-normal">
+                <div className="col-span-3 text-center text-slate-400 dark:text-slate-500 font-normal">
                   Traditional Classifieds
                 </div>
               </div>
@@ -589,18 +588,17 @@ export default function HomePage() {
               ].map((row, idx) => (
                 <div
                   key={row.feature}
-                  className={`grid grid-cols-12 py-3.5 items-center text-xs sm:text-sm border-b border-slate-200/60 last:border-0 ${
-                    idx % 2 === 0 ? "bg-white/60" : "bg-transparent"
-                  } px-3 rounded-xl`}
+                  className={`grid grid-cols-12 py-3.5 items-center text-xs sm:text-sm border-b border-slate-200/60 dark:border-slate-800/60 last:border-0 ${idx % 2 === 0 ? "bg-white/60 dark:bg-slate-800/30" : "bg-transparent"
+                    } px-3 rounded-xl`}
                 >
-                  <div className="col-span-6 font-bold text-slate-800">{row.feature}</div>
-                  <div className="col-span-3 text-center font-black text-emerald-600 flex items-center justify-center gap-1.5">
-                    <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-[10px] font-black">✓</span>
+                  <div className="col-span-6 font-bold text-slate-800 dark:text-slate-200">{row.feature}</div>
+                  <div className="col-span-3 text-center font-black text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-1.5">
+                    <span className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 flex items-center justify-center text-[10px] font-black">✓</span>
                     <span>{row.rhText}</span>
                   </div>
                   <div className="col-span-3 text-center text-rose-500 font-medium flex items-center justify-center gap-1.5">
-                    <span className="w-5 h-5 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center text-[10px] font-black">✕</span>
-                    <span className="text-slate-500">{row.tradText}</span>
+                    <span className="w-5 h-5 rounded-full bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 flex items-center justify-center text-[10px] font-black">✕</span>
+                    <span className="text-slate-500 dark:text-slate-400">{row.tradText}</span>
                   </div>
                 </div>
               ))}
@@ -725,16 +723,16 @@ export default function HomePage() {
       {/* ============================================================
           8. FREQUENTLY ASKED QUESTIONS (FAQ ACCORDION)
           ============================================================ */}
-      <section className="py-16 sm:py-24 bg-slate-50 border-t border-slate-200">
+      <section className="py-16 sm:py-24 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 transition-colors duration-300">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 sm:mb-16">
-            <span className="text-[10px] sm:text-xs font-extrabold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3.5 py-1.5 rounded-full border border-indigo-100">
+            <span className="text-[10px] sm:text-xs font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest bg-indigo-50 dark:bg-indigo-950/60 px-3.5 py-1.5 rounded-full border border-indigo-100 dark:border-indigo-800/60">
               Clear & Transparent
             </span>
-            <h2 className="text-2xl sm:text-4xl font-black text-slate-900 mt-2 tracking-tight">
+            <h2 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white mt-2 tracking-tight">
               Frequently Asked Questions
             </h2>
-            <p className="text-slate-500 text-xs sm:text-sm mt-2">
+            <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-2">
               Everything you need to know about buying, selling, and escrow protection on ReSell Hub.
             </p>
           </div>
@@ -764,13 +762,13 @@ export default function HomePage() {
             ].map((faq) => (
               <details
                 key={faq.q}
-                className="group bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-xs open:shadow-md transition-all cursor-pointer"
+                className="group bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs open:shadow-md transition-all cursor-pointer"
               >
-                <summary className="font-black text-slate-900 text-xs sm:text-base flex items-center justify-between list-none">
+                <summary className="font-black text-slate-900 dark:text-white text-xs sm:text-base flex items-center justify-between list-none">
                   <span>{faq.q}</span>
-                  <ChevronRight size={18} className="text-indigo-600 group-open:rotate-90 transition-transform shrink-0 ml-2" />
+                  <ChevronRight size={18} className="text-indigo-600 dark:text-indigo-400 group-open:rotate-90 transition-transform shrink-0 ml-2" />
                 </summary>
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-slate-100 font-normal">
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-slate-100 dark:border-slate-800 font-normal">
                   {faq.a}
                 </p>
               </details>

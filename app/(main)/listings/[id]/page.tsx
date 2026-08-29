@@ -594,7 +594,7 @@ export default function ProductDetailPage() {
       setIsFavorited(res.isFavorited);
       toast.success(res.isFavorited ? "Saved to wishlist! ❤️" : "Removed from wishlist");
       // Background sync with API
-      productService.toggleFavorite(product._id).catch(() => {});
+      productService.toggleFavorite(product._id).catch(() => { });
     } catch {
       setIsFavorited(!isFavorited);
     } finally {
@@ -795,11 +795,10 @@ export default function ProductDetailPage() {
                     key={img.publicId || index}
                     type="button"
                     onClick={() => setActiveImageIndex(index)}
-                    className={`relative w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all shrink-0 ${
-                      activeImageIndex === index
+                    className={`relative w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all shrink-0 ${activeImageIndex === index
                         ? "border-indigo-600 shadow-md scale-105"
                         : "border-slate-200 opacity-60 hover:opacity-100 hover:border-slate-300"
-                    }`}
+                      }`}
                   >
                     <img src={img.url} alt={`View ${index + 1}`} className="w-full h-full object-cover" />
                   </button>
@@ -1108,11 +1107,10 @@ export default function ProductDetailPage() {
                     <button
                       type="button"
                       onClick={() => toggleCompare(product)}
-                      className={`py-3 rounded-2xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all border ${
-                        isInCompare(product._id)
+                      className={`py-3 rounded-2xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all border ${isInCompare(product._id)
                           ? "bg-indigo-600 text-white border-indigo-600"
                           : "bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700"
-                      }`}
+                        }`}
                     >
                       {isInCompare(product._id) ? <Check size={15} /> : <Scale size={15} />}
                       <span>{isInCompare(product._id) ? "In Compare" : "Compare"}</span>
