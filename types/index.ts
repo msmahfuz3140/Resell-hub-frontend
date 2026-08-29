@@ -5,6 +5,7 @@ export interface User {
   email: string;
   avatar?: string | null;
   photo?: { url: string | null; publicId: string | null } | null;
+  coverPhoto?: { url: string | null; publicId: string | null } | null;
   role: "buyer" | "seller" | "admin";
   status: "active" | "inactive" | "banned";
   provider: "local" | "google";

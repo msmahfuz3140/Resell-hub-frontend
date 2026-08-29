@@ -278,7 +278,7 @@ function ProfileContent() {
   };
 
   const currentAvatarUrl = avatarPreview || user?.photo?.url;
-  const currentCoverUrl = coverPreview || (user as Record<string, unknown>)?.coverPhoto as string | null | undefined;
+  const currentCoverUrl = coverPreview || user?.coverPhoto?.url;
 
   return (
     <>
