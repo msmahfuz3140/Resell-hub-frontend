@@ -247,10 +247,20 @@ export default function SellerDashboard({ user }: { user: User | null }) {
     }
   };
 
-  const pendingOrdersCount = orders.filter((o) => ["placed", "processing"].includes(o.orderStatus)).length;
-  const totalRevenue = orders
-    .filter((o) => ["paid", "completed", "delivered", "shipped"].includes(o.orderStatus))
-    .reduce((acc, o) => acc + (o.sellerAmount || o.amount * 0.95), 0);
+  const activePaidOrders = orders.filter(
+    (o) =>
+      (o.paymentStatus === "paid" || ["completed", "delivered", "shipped"].includes(o.orderStatus)) &&
+      o.orderStatus !== "cancelled" &&
+      o.paymentStatus !== "refunded"
+  );
+  const pendingOrdersCount = orders.filter(
+    (o) => ["placed", "confirmed", "processing"].includes(o.orderStatus) && o.paymentStatus !== "refunded"
+  ).length;
+  const totalRevenue = activePaidOrders.reduce(
+    (acc, o) => acc + (o.sellerAmount || o.amount * 0.95),
+    0
+  );
+  const totalSalesCount = activePaidOrders.length;
 
   // Analytics chart mock series based on seller stats
   const sampleOrderTrend = [
@@ -288,8 +298,8 @@ export default function SellerDashboard({ user }: { user: User | null }) {
             <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div className="min-w-0 flex-1">
-            <span className="text-base sm:text-xl lg:text-2xl font-black text-slate-900 block truncate">{ordersMeta.total}</span>
-            <span className="text-[11px] sm:text-xs font-bold text-slate-400 block truncate">Total Sales</span>
+            <span className="text-base sm:text-xl lg:text-2xl font-black text-slate-900 block truncate">{totalSalesCount || ordersMeta.total}</span>
+            <span className="text-[11px] sm:text-xs font-bold text-slate-400 block truncate">Active Sales</span>
           </div>
         </div>
 
@@ -298,10 +308,10 @@ export default function SellerDashboard({ user }: { user: User | null }) {
             <DollarSign className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div className="min-w-0 flex-1">
-            <span className="text-base sm:text-xl lg:text-2xl font-black text-slate-900 block truncate" title={formatCurrency(totalRevenue || 94000)}>
-              {formatCurrency(totalRevenue || 94000)}
+            <span className="text-base sm:text-xl lg:text-2xl font-black text-slate-900 block truncate" title={formatCurrency(totalRevenue)}>
+              {formatCurrency(totalRevenue)}
             </span>
-            <span className="text-[11px] sm:text-xs font-bold text-slate-400 block truncate">Total Revenue</span>
+            <span className="text-[11px] sm:text-xs font-bold text-slate-400 block truncate">Net Earnings</span>
           </div>
         </div>
 

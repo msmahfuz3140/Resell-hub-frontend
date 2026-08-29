@@ -478,9 +478,13 @@ export default function BuyerDashboard({ user, onRefreshUser }: { user: User | n
     }
   }, [activeTab, fetchOrders, fetchWishlist]);
 
-  const totalSpent = orders
-    .filter((o) => ["paid", "completed", "delivered", "shipped"].includes(o.orderStatus))
-    .reduce((acc, o) => acc + o.amount, 0);
+  const activePaidOrders = orders.filter(
+    (o) =>
+      (o.paymentStatus === "paid" || ["completed", "delivered", "shipped"].includes(o.orderStatus)) &&
+      o.orderStatus !== "cancelled" &&
+      o.paymentStatus !== "refunded"
+  );
+  const totalSpent = activePaidOrders.reduce((acc, o) => acc + o.amount, 0);
 
   return (
     <div className="space-y-8">
