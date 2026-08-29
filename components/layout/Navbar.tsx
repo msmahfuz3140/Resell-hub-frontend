@@ -84,19 +84,20 @@ export default function Navbar() {
             : "bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border-b border-slate-100 dark:border-slate-800/40 py-4"
           }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 flex items-center justify-between gap-2">
           {/* ── Logo ── */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 p-[2px] shadow-md shadow-indigo-500/20 group-hover:shadow-indigo-500/40 transition-all duration-300 group-hover:scale-105">
-              <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center">
-                <ShoppingBag size={20} className="text-white" />
+          <Link href="/" className="flex items-center gap-2 sm:gap-3 group shrink-0">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 p-[1.5px] sm:p-[2px] shadow-md shadow-indigo-500/20 group-hover:shadow-indigo-500/40 transition-all duration-300 group-hover:scale-105 shrink-0">
+              <div className="w-full h-full bg-slate-950 rounded-[10px] sm:rounded-[14px] flex items-center justify-center">
+                <ShoppingBag size={16} className="text-white sm:hidden" />
+                <ShoppingBag size={20} className="text-white hidden sm:block" />
               </div>
             </div>
             <div className="flex flex-col">
-              <span className="text-xl font-black tracking-tight text-slate-900 dark:text-white leading-none">
+              <span className="text-lg sm:text-xl font-black tracking-tight text-slate-900 dark:text-white leading-none">
                 ReSell<span className="text-indigo-600 dark:text-indigo-400">Hub</span>
               </span>
-              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">
+              <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">
                 Marketplace
               </span>
             </div>
@@ -123,19 +124,19 @@ export default function Navbar() {
           </nav>
 
           {/* ── Right Actions (Theme + Post Ad + Auth + Search) ── */}
-          <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             {/* Dark / Light Mode Toggle Button */}
             <button
               type="button"
               onClick={toggleTheme}
-              className="p-2 sm:p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700 transition-all cursor-pointer relative overflow-hidden group shadow-xs"
+              className="p-1.5 sm:p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700 transition-all cursor-pointer relative overflow-hidden group shadow-xs shrink-0"
               title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
               aria-label="Toggle Theme"
             >
               {isDark ? (
-                <Sun size={17} className="text-amber-400 group-hover:rotate-45 transition-transform duration-300" />
+                <Sun size={16} className="text-amber-400 group-hover:rotate-45 transition-transform duration-300 sm:w-[17px] sm:h-[17px]" />
               ) : (
-                <Moon size={17} className="text-indigo-600 group-hover:-rotate-12 transition-transform duration-300" />
+                <Moon size={16} className="text-indigo-600 group-hover:-rotate-12 transition-transform duration-300 sm:w-[17px] sm:h-[17px]" />
               )}
             </button>
 
@@ -164,9 +165,9 @@ export default function Navbar() {
                 <button
                   type="button"
                   onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="flex items-center gap-2.5 p-1.5 pr-3 rounded-full bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-all cursor-pointer"
+                  className="flex items-center gap-2 sm:gap-2.5 p-1 sm:p-1.5 pr-2.5 sm:pr-3 rounded-full bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-all cursor-pointer"
                 >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white flex items-center justify-center font-bold text-xs shadow-sm overflow-hidden">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white flex items-center justify-center font-bold text-xs shadow-sm overflow-hidden shrink-0">
                     {user?.photo?.url ? (
                       <img src={user.photo.url} alt={user.name} className="w-full h-full object-cover" />
                     ) : (
@@ -271,16 +272,16 @@ export default function Navbar() {
                 </AnimatePresence>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 sm:gap-2">
                 <Link
                   href="/login"
-                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+                  className="px-2 sm:px-4 py-1.5 sm:py-2.5 rounded-xl text-[11px] sm:text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all whitespace-nowrap"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/register"
-                  className="px-4 py-2.5 rounded-xl text-xs font-extrabold btn-shiny-primary shadow-sm"
+                  className="px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-xl text-[11px] sm:text-xs font-extrabold btn-shiny-primary shadow-xs whitespace-nowrap"
                 >
                   Join Free
                 </Link>
@@ -291,9 +292,10 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700"
+              className="md:hidden p-1.5 sm:p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0"
+              aria-label="Toggle navigation menu"
             >
-              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+              {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
           </div>
         </div>
@@ -306,14 +308,14 @@ export default function Navbar() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="fixed inset-x-0 top-[70px] bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border-b border-slate-200 dark:border-slate-800 p-6 z-40 md:hidden shadow-2xl space-y-4"
+            className="fixed inset-x-0 top-[60px] sm:top-[70px] bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border-b border-slate-200 dark:border-slate-800 p-5 sm:p-6 z-40 md:hidden shadow-2xl space-y-4"
           >
             <div className="space-y-1">
               {NAV_ITEMS.map(({ href, label, icon: Icon }) => (
                 <Link
                   key={href}
                   href={href}
-                  className={`flex items-center gap-3 p-3 rounded-xl text-sm font-bold ${pathname === href
+                  className={`flex items-center gap-3 p-2.5 sm:p-3 rounded-xl text-sm font-bold ${pathname === href
                       ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400"
                       : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
                     }`}
@@ -327,11 +329,28 @@ export default function Navbar() {
             <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-2">
               <Link
                 href="/add-product"
-                className="btn-shiny-amber w-full py-3 rounded-xl text-center text-xs font-extrabold flex items-center justify-center gap-2"
+                className="btn-shiny-amber w-full py-2.5 sm:py-3 rounded-xl text-center text-xs font-extrabold flex items-center justify-center gap-2"
               >
                 <PlusCircle size={16} />
                 <span>Sell an Item Free</span>
               </Link>
+
+              {!isAuthenticated && (
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <Link
+                    href="/login"
+                    className="w-full py-2.5 rounded-xl text-center text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="w-full py-2.5 rounded-xl text-center text-xs font-extrabold btn-shiny-primary shadow-xs"
+                  >
+                    Join Free
+                  </Link>
+                </div>
+              )}
             </div>
           </motion.div>
         )}
