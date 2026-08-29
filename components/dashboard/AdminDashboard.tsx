@@ -1363,27 +1363,83 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-                  {orders.map((o) => (
-                    <tr key={o._id} className="hover:bg-slate-50/60 transition-colors">
-                      <td className="py-3.5 px-4 font-mono font-bold text-slate-900">#{o.orderNumber}</td>
-                      <td className="py-3.5 px-4">{o.buyerInfo?.name}</td>
-                      <td className="py-3.5 px-4">{o.sellerInfo?.name}</td>
-                      <td className="py-3.5 px-4 font-black text-slate-900">{formatCurrency(o.amount)}</td>
-                      <td className="py-3.5 px-4">
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-indigo-50 text-indigo-700 border border-indigo-200">
-                          {o.orderStatus}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4 text-right">
-                        <button
-                          onClick={() => setOverrideOrderTarget(o)}
-                          className="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold text-[11px] transition-all"
-                        >
-                          Override
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {orders.map((o) => {
+                    const getOrderStatusStyle = (status: string) => {
+                      switch (status) {
+                        case "confirmed":
+                          return { bg: "bg-indigo-50 text-indigo-700 border-indigo-200", dot: "bg-indigo-500" };
+                        case "completed":
+                          return { bg: "bg-emerald-50 text-emerald-700 border-emerald-200", dot: "bg-emerald-500" };
+                        case "shipped":
+                          return { bg: "bg-blue-50 text-blue-700 border-blue-200", dot: "bg-blue-500" };
+                        case "delivered":
+                          return { bg: "bg-teal-50 text-teal-700 border-teal-200", dot: "bg-teal-500" };
+                        case "processing":
+                          return { bg: "bg-amber-50 text-amber-700 border-amber-200", dot: "bg-amber-500" };
+                        case "placed":
+                          return { bg: "bg-sky-50 text-sky-700 border-sky-200", dot: "bg-sky-500" };
+                        case "cancelled":
+                          return { bg: "bg-rose-50 text-rose-700 border-rose-200", dot: "bg-rose-500" };
+                        case "disputed":
+                          return { bg: "bg-purple-50 text-purple-700 border-purple-200", dot: "bg-purple-500" };
+                        default:
+                          return { bg: "bg-slate-50 text-slate-700 border-slate-200", dot: "bg-slate-400" };
+                      }
+                    };
+
+                    const orderStyle = getOrderStatusStyle(o.orderStatus);
+
+                    return (
+                      <tr key={o._id} className="hover:bg-slate-50/60 transition-colors">
+                        <td className="py-3.5 px-4">
+                          <div className="font-mono font-bold text-slate-900">#{o.orderNumber}</div>
+                          <div className="text-[10px] text-slate-400 truncate max-w-[140px]">
+                            {o.productSnapshot?.title || "Marketplace Item"}
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <div className="text-slate-900 font-bold">{o.buyerInfo?.name || "Buyer"}</div>
+                          <div className="text-[10px] text-slate-400 truncate">{o.buyerInfo?.email}</div>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <div className="text-slate-900 font-bold">{o.sellerInfo?.name || "Seller"}</div>
+                          <div className="text-[10px] text-slate-400 truncate">{o.sellerInfo?.email}</div>
+                        </td>
+                        <td className="py-3.5 px-4 font-black text-slate-900">{formatCurrency(o.amount)}</td>
+                        <td className="py-3.5 px-4">
+                          <div className="flex flex-col gap-1">
+                            <span
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider w-fit border ${orderStyle.bg}`}
+                            >
+                              <span className={`w-1.5 h-1.5 rounded-full ${orderStyle.dot}`} />
+                              {o.orderStatus}
+                            </span>
+                            <span
+                              className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md w-fit border ${
+                                o.paymentStatus === "paid"
+                                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                  : o.paymentStatus === "refunded"
+                                  ? "bg-purple-50 text-purple-700 border-purple-200"
+                                  : o.paymentStatus === "failed"
+                                  ? "bg-rose-50 text-rose-700 border-rose-200"
+                                  : "bg-amber-50 text-amber-700 border-amber-200"
+                              }`}
+                            >
+                              {o.paymentStatus}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <button
+                            onClick={() => setOverrideOrderTarget(o)}
+                            className="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold text-[11px] transition-all cursor-pointer"
+                          >
+                            Override
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
