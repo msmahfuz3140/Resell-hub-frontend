@@ -177,11 +177,11 @@ function PaymentSuccessContent() {
               <div className="border border-slate-200/80 rounded-2xl p-4 flex items-center gap-4">
                 <div className="w-16 h-16 rounded-xl bg-slate-100 overflow-hidden relative shrink-0 border border-slate-200">
                   {order.productSnapshot.image ? (
-                    <Image
+                    <img
                       src={order.productSnapshot.image}
                       alt={order.productSnapshot.title}
-                      fill
-                      className="object-cover"
+                      className="w-full h-full object-cover"
+                      loading="lazy"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-400">

@@ -601,11 +601,11 @@ function CheckoutContent() {
               <div className="flex gap-4 items-start">
                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0 relative">
                   {product.images?.[0]?.url ? (
-                    <Image
+                    <img
                       src={product.images[0].url}
                       alt={product.title}
-                      fill
-                      className="object-cover"
+                      className="w-full h-full object-cover"
+                      loading="lazy"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-400">
