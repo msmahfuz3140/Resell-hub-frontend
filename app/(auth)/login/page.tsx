@@ -38,6 +38,8 @@ const GoogleIcon = () => (
 function LoginContent() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const isRegistered = searchParams.get("registered") === "true";
+  const registeredEmail = searchParams.get("email") || "";
 
   const { login, googleLogin } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
@@ -48,7 +50,10 @@ function LoginContent() {
     handleSubmit,
     setValue,
     formState: { errors, isSubmitting },
-  } = useForm<LoginFormData>({ resolver: zodResolver(loginSchema) });
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: registeredEmail },
+  });
 
   const onSubmit = async (data: LoginFormData) => {
     try {
@@ -168,10 +173,16 @@ function LoginContent() {
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 mt-2">
               Sign in to your account
             </h1>
+            {isRegistered && (
+              <div className="mt-3 p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2.5 shadow-xs animate-in fade-in">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                <span>Account created successfully! 🎉 Please enter your password to sign in.</span>
+              </div>
+            )}
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Don&apos;t have an account?{" "}
+              New to ReSell Hub?{" "}
               <Link href="/register" className="font-extrabold text-indigo-600 hover:text-indigo-800">
-                Register for free
+                Create free account
               </Link>
             </p>
           </div>

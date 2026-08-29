@@ -2,6 +2,7 @@
 
 import { useState, Suspense } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -18,6 +19,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import authService from "@/services/authService";
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -45,6 +47,8 @@ function RegisterContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
+  const router = useRouter();
+
   const {
     register,
     handleSubmit,
@@ -60,14 +64,20 @@ function RegisterContent() {
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
-      await authRegister({
+      // Call register API
+      const res = await authService.register({
         name: data.name,
         email: data.email,
         password: data.password,
         role: data.role,
       });
-      toast.success("Account created! Welcome to ReSell Hub 🎉");
-      window.location.href = "/dashboard";
+
+      if (res.success) {
+        toast.success("Account created successfully! 🎉 Please sign in to continue.");
+        router.push(`/login?registered=true&email=${encodeURIComponent(data.email)}`);
+      } else {
+        throw new Error(res.message || "Registration failed.");
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Registration failed. Please try again.";
       toast.error(msg);
