@@ -47,6 +47,8 @@ export default function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const canSell = isAuthenticated && (user?.role === "seller" || user?.role === "admin");
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 15);
@@ -150,14 +152,16 @@ export default function Navbar() {
               <kbd className="text-[10px] bg-white dark:bg-slate-900 text-slate-400 dark:text-slate-400 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">⌘K</kbd>
             </Link>
 
-            {/* Post Item / Sell Button */}
-            <Link
-              href="/add-product"
-              className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-extrabold btn-shiny-amber"
-            >
-              <PlusCircle size={15} />
-              <span>Sell Item</span>
-            </Link>
+            {/* Post Item / Sell Button (Only for authenticated Seller/Admin) */}
+            {canSell && (
+              <Link
+                href="/add-product"
+                className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-extrabold btn-shiny-amber shrink-0"
+              >
+                <PlusCircle size={15} />
+                <span>Sell Item</span>
+              </Link>
+            )}
 
             {/* User Dropdown or Login */}
             {isAuthenticated ? (
@@ -327,13 +331,15 @@ export default function Navbar() {
             </div>
 
             <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-2">
-              <Link
-                href="/add-product"
-                className="btn-shiny-amber w-full py-2.5 sm:py-3 rounded-xl text-center text-xs font-extrabold flex items-center justify-center gap-2"
-              >
-                <PlusCircle size={16} />
-                <span>Sell an Item Free</span>
-              </Link>
+              {canSell && (
+                <Link
+                  href="/add-product"
+                  className="btn-shiny-amber w-full py-2.5 sm:py-3 rounded-xl text-center text-xs font-extrabold flex items-center justify-center gap-2"
+                >
+                  <PlusCircle size={16} />
+                  <span>Sell an Item</span>
+                </Link>
+              )}
 
               {!isAuthenticated && (
                 <div className="grid grid-cols-2 gap-2 pt-1">
