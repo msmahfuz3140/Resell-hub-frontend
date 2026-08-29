@@ -527,10 +527,10 @@ export default function BuyerDashboard({ user, onRefreshUser }: { user: User | n
       </div>
 
       {/* ── Sub Navigation Tabs ── */}
-      <div className="bg-white p-1.5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-1 overflow-x-auto">
+      <div className="bg-white p-1.5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-1 overflow-x-auto scrollbar-none max-w-full">
         <button
           onClick={() => setActiveTab("orders")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all whitespace-nowrap ${
+          className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-black shrink-0 transition-all whitespace-nowrap ${
             activeTab === "orders" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
           }`}
         >
@@ -538,7 +538,7 @@ export default function BuyerDashboard({ user, onRefreshUser }: { user: User | n
         </button>
         <button
           onClick={() => setActiveTab("wishlist")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all whitespace-nowrap ${
+          className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-black shrink-0 transition-all whitespace-nowrap ${
             activeTab === "wishlist" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
           }`}
         >
@@ -546,7 +546,7 @@ export default function BuyerDashboard({ user, onRefreshUser }: { user: User | n
         </button>
         <button
           onClick={() => setActiveTab("payments")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all whitespace-nowrap ${
+          className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-black shrink-0 transition-all whitespace-nowrap ${
             activeTab === "payments" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
           }`}
         >
@@ -554,7 +554,7 @@ export default function BuyerDashboard({ user, onRefreshUser }: { user: User | n
         </button>
         <button
           onClick={() => setActiveTab("profile")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all whitespace-nowrap ${
+          className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-black shrink-0 transition-all whitespace-nowrap ${
             activeTab === "profile" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
           }`}
         >

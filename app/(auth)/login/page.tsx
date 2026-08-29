@@ -259,17 +259,17 @@ function LoginContent() {
 
           {/* 1-Click Demo Login */}
           <div className="pt-3 border-t border-slate-100 text-center">
-            <span className="text-[11px] font-black uppercase tracking-wider text-slate-400 block mb-2.5">
+            <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-400 block mb-2 sm:mb-2.5">
               ⚡ 1-Click Instant Demo Login:
             </span>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
               {(["buyer", "seller", "admin"] as const).map((r) => (
                 <button
                   key={r}
                   type="button"
                   disabled={!!isDemoLoggingIn}
                   onClick={() => handle1ClickDemoLogin(r)}
-                  className={`py-2 px-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 shadow-sm border ${
+                  className={`py-2 px-1 sm:px-2 rounded-xl text-[11px] sm:text-xs font-black transition-all flex items-center justify-center gap-1 shadow-xs border ${
                     r === "buyer"
                       ? "bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200"
                       : r === "seller"
@@ -278,7 +278,7 @@ function LoginContent() {
                   }`}
                 >
                   {isDemoLoggingIn === r ? (
-                    <Loader2 size={13} className="animate-spin" />
+                    <Loader2 size={12} className="animate-spin" />
                   ) : (
                     <span>{r === "buyer" ? "🛒 Buyer" : r === "seller" ? "💼 Seller" : "👑 Admin"}</span>
                   )}

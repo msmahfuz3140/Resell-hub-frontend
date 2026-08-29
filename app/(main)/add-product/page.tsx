@@ -282,29 +282,30 @@ function AddProductContent() {
           <p className="text-slate-500 text-sm mt-2">Fill in the details to list your item for sale</p>
         </div>
 
-        {/* Step Indicators */}
-        <div className="flex items-center justify-center gap-0 mb-10">
+        {/* Step Indicator */}
+        <div className="flex items-center justify-center mb-8 px-2">
           {STEPS.map((s, i) => (
             <React.Fragment key={s.id}>
               <div className="flex flex-col items-center">
                 <button
-                  onClick={() => { if (s.id < step) setStep(s.id); }}
-                  className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black text-sm transition-all ${
+                  type="button"
+                  onClick={() => s.id < step && setStep(s.id)}
+                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-2xl flex items-center justify-center font-black text-xs transition-all ${
                     s.id === step
-                      ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200 scale-110"
+                      ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200"
                       : s.id < step
-                      ? "bg-emerald-500 text-white cursor-pointer hover:scale-105"
-                      : "bg-slate-200 text-slate-400 cursor-not-allowed"
+                      ? "bg-emerald-500 text-white"
+                      : "bg-slate-100 text-slate-400"
                   }`}
                 >
                   {s.id < step ? <CheckCircle2 size={18} /> : <s.icon size={16} />}
                 </button>
-                <span className={`text-[11px] font-bold mt-1.5 ${s.id === step ? "text-indigo-600" : s.id < step ? "text-emerald-600" : "text-slate-400"}`}>
+                <span className={`text-[10px] sm:text-[11px] font-bold mt-1.5 ${s.id === step ? "text-indigo-600" : s.id < step ? "text-emerald-600" : "text-slate-400"}`}>
                   {s.label}
                 </span>
               </div>
               {i < STEPS.length - 1 && (
-                <div className={`h-0.5 w-16 sm:w-24 mx-1 mb-5 transition-all ${s.id < step ? "bg-emerald-400" : "bg-slate-200"}`} />
+                <div className={`h-0.5 w-8 xs:w-12 sm:w-20 mx-1 mb-5 transition-all ${s.id < step ? "bg-emerald-400" : "bg-slate-200"}`} />
               )}
             </React.Fragment>
           ))}
@@ -314,7 +315,7 @@ function AddProductContent() {
         <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
           {/* Step 1: Images */}
           {step === 1 && (
-            <div className="p-6 sm:p-8 space-y-6">
+            <div className="p-5 sm:p-8 space-y-6">
               <div>
                 <h2 className="text-xl font-black text-slate-900 mb-1">Product Photos</h2>
                 <p className="text-xs text-slate-500">Upload up to 8 photos. First photo is the cover.</p>
@@ -327,7 +328,7 @@ function AddProductContent() {
                 onDragLeave={() => setIsDragging(false)}
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
-                className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all ${
+                className={`border-2 border-dashed rounded-2xl p-6 sm:p-10 text-center cursor-pointer transition-all ${
                   isDragging
                     ? "border-indigo-500 bg-indigo-50/60"
                     : errors.images
@@ -335,11 +336,11 @@ function AddProductContent() {
                     : "border-slate-300 hover:border-indigo-400 hover:bg-indigo-50/30"
                 }`}
               >
-                <Upload size={32} className={`mx-auto mb-3 ${isDragging ? "text-indigo-600" : "text-slate-400"}`} />
-                <p className="text-sm font-bold text-slate-600 mb-1">
+                <Upload size={30} className={`mx-auto mb-3 ${isDragging ? "text-indigo-600" : "text-slate-400"}`} />
+                <p className="text-xs sm:text-sm font-bold text-slate-600 mb-1">
                   {isDragging ? "Drop images here" : "Drag & drop or click to upload"}
                 </p>
-                <p className="text-xs text-slate-400">PNG, JPG, WEBP up to 5MB each • Max 8 photos</p>
+                <p className="text-[11px] sm:text-xs text-slate-400">PNG, JPG, WEBP up to 5MB each • Max 8 photos</p>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -358,7 +359,7 @@ function AddProductContent() {
                     <span className="text-xs font-bold text-slate-600">{images.length}/8 photos uploaded</span>
                     <span className="text-xs text-slate-400">Click ⭐ to set cover photo</span>
                   </div>
-                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 gap-2.5 sm:gap-3">
                     {images.map((img, i) => (
                       <div key={i} className={`relative aspect-square rounded-2xl overflow-hidden border-2 group ${img.isPrimary ? "border-indigo-600 shadow-lg shadow-indigo-100" : "border-slate-200"}`}>
                         <img src={img.preview} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />

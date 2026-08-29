@@ -395,8 +395,8 @@ function ListingsContent() {
   return (
     <div className="bg-slate-50 min-h-screen py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Page Header */}
-        <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        {/* Top Title & Quick Filters */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-black uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
@@ -406,19 +406,19 @@ function ListingsContent() {
                 {isLoading ? "Loading..." : `${meta.total.toLocaleString()} listings`}
               </span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight mt-1">
+            <h1 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight mt-1">
               Marketplace Listings
             </h1>
           </div>
 
           {/* Sort selector */}
-          <div className="flex items-center gap-3">
-            <ArrowUpDown size={15} className="text-slate-400 hidden sm:block" />
-            <span className="text-xs text-slate-400 font-bold hidden sm:inline">Sort:</span>
+          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+            <ArrowUpDown size={15} className="text-slate-400 hidden sm:block shrink-0" />
+            <span className="text-xs text-slate-400 font-bold hidden sm:inline shrink-0">Sort:</span>
             <select
               value={sortBy}
               onChange={(e) => { setSortBy(e.target.value); setPage(1); }}
-              className="text-xs font-bold bg-white text-slate-700 py-2.5 px-4 rounded-xl border border-slate-200 shadow-xs outline-none cursor-pointer focus:border-indigo-400 transition-colors"
+              className="text-xs font-bold bg-white text-slate-700 py-2.5 px-3 sm:px-4 rounded-xl border border-slate-200 shadow-xs outline-none cursor-pointer focus:border-indigo-400 transition-colors w-full sm:w-auto"
             >
               {SORT_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>

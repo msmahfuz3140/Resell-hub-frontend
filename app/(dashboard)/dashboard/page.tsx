@@ -77,15 +77,15 @@ function DashboardContent() {
         </div>
 
         {/* ── Top Header Banner with Ambient Dark Glow ── */}
-        <div className="bg-gradient-to-r from-slate-950 via-indigo-950 to-slate-950 text-white p-6 sm:p-10 rounded-3xl shadow-xl mb-8 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/20 rounded-full blur-[100px] pointer-events-none" />
-          <div className="absolute -bottom-10 left-1/3 w-64 h-64 bg-cyan-500/15 rounded-full blur-[80px] pointer-events-none" />
+        <div className="bg-gradient-to-r from-slate-950 via-indigo-950 to-slate-950 text-white p-5 sm:p-10 rounded-2xl sm:rounded-3xl shadow-xl mb-6 sm:mb-8 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-80 sm:w-96 h-80 sm:h-96 bg-indigo-500/20 rounded-full blur-[90px] pointer-events-none" />
+          <div className="absolute -bottom-10 left-1/3 w-48 sm:w-64 h-48 sm:h-64 bg-cyan-500/15 rounded-full blur-[70px] pointer-events-none" />
 
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="flex items-center gap-4">
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5 sm:gap-6">
+            <div className="flex items-center gap-3.5 sm:gap-4">
               {/* Avatar Frame */}
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 p-[2px] shadow-lg shrink-0">
-                <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center font-black text-2xl text-white overflow-hidden">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 p-[2px] shadow-lg shrink-0">
+                <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center font-black text-xl sm:text-2xl text-white overflow-hidden">
                   {user?.photo?.url ? (
                     <img src={user.photo.url} alt={user.name} className="w-full h-full object-cover" />
                   ) : (
@@ -96,7 +96,7 @@ function DashboardContent() {
 
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-2xl sm:text-3xl font-black tracking-tight">{user?.name}</h1>
+                  <h1 className="text-xl sm:text-3xl font-black tracking-tight">{user?.name}</h1>
                   <span
                     className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full border ${
                       user?.role === "admin"
@@ -109,7 +109,7 @@ function DashboardContent() {
                     {user?.role} Portal
                   </span>
                 </div>
-                <p className="text-xs text-indigo-200/80 mt-1 flex items-center gap-2 flex-wrap">
+                <p className="text-[11px] sm:text-xs text-indigo-200/80 mt-1 flex items-center gap-2 flex-wrap">
                   <span>{user?.email}</span>
                   <span>•</span>
                   <span>Member since {new Date(user?.createdAt || "").getFullYear() || 2024}</span>
@@ -118,16 +118,16 @@ function DashboardContent() {
             </div>
 
             {/* Top Right Action Buttons */}
-            <div className="flex items-center gap-2.5 flex-wrap">
+            <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
               <Link
                 href="/"
-                className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/15 text-xs font-bold transition-all flex items-center gap-1.5"
+                className="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/15 text-xs font-bold transition-all flex items-center gap-1.5"
               >
                 <span>🏠 Home</span>
               </Link>
               <Link
                 href="/listings"
-                className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/15 text-xs font-bold transition-all flex items-center gap-1.5"
+                className="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/15 text-xs font-bold transition-all flex items-center gap-1.5"
               >
                 <ShoppingBag size={14} />
                 <span>Marketplace</span>
@@ -135,7 +135,7 @@ function DashboardContent() {
               {isSeller && (
                 <Link
                   href="/add-product"
-                  className="btn-shiny-amber px-4 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg"
+                  className="btn-shiny-amber px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl font-black text-xs uppercase tracking-wider flex items-center gap-1.5 sm:gap-2 shadow-lg"
                 >
                   <PlusCircle size={15} />
                   <span>Post Ad</span>
@@ -144,7 +144,7 @@ function DashboardContent() {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="px-4 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border border-rose-500/30 text-xs font-bold transition-all flex items-center gap-1.5"
+                className="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border border-rose-500/30 text-xs font-bold transition-all flex items-center gap-1.5"
               >
                 <LogOut size={14} />
                 <span>Logout</span>
@@ -155,18 +155,18 @@ function DashboardContent() {
 
         {/* ── Role Switcher Pill Bar (For Admin & Multi-role Users) ── */}
         {(isAdmin || isSeller) && (
-          <div className="mb-8 bg-white p-2 rounded-2xl border border-slate-200/90 shadow-sm flex items-center justify-between flex-wrap gap-3">
+          <div className="mb-6 sm:mb-8 bg-white p-2 sm:p-2.5 rounded-2xl border border-slate-200/90 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2 px-2">
-              <span className="text-xs font-black uppercase tracking-wider text-slate-400">
+              <span className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-400">
                 Dashboard Mode:
               </span>
             </div>
 
-            <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
+            <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl overflow-x-auto max-w-full scrollbar-none w-full sm:w-auto">
               {isAdmin && (
                 <button
                   onClick={() => setActiveRoleView("admin")}
-                  className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-black transition-all ${
+                  className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg text-xs font-black shrink-0 transition-all ${
                     activeRoleView === "admin"
                       ? "bg-purple-600 text-white shadow-md shadow-purple-200"
                       : "text-slate-600 hover:text-slate-900"
@@ -179,7 +179,7 @@ function DashboardContent() {
               {isSeller && (
                 <button
                   onClick={() => setActiveRoleView("seller")}
-                  className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-black transition-all ${
+                  className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg text-xs font-black shrink-0 transition-all ${
                     activeRoleView === "seller"
                       ? "bg-indigo-600 text-white shadow-md shadow-indigo-200"
                       : "text-slate-600 hover:text-slate-900"
@@ -191,7 +191,7 @@ function DashboardContent() {
 
               <button
                 onClick={() => setActiveRoleView("buyer")}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-black transition-all ${
+                className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg text-xs font-black shrink-0 transition-all ${
                   activeRoleView === "buyer"
                     ? "bg-slate-900 text-white shadow-md"
                     : "text-slate-600 hover:text-slate-900"

@@ -627,10 +627,10 @@ export default function AdminDashboard() {
       </div>
 
       {/* ── Sub Navigation Tabs ── */}
-      <div className="bg-white p-1.5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-1 overflow-x-auto">
+      <div className="bg-white p-1.5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-1 overflow-x-auto scrollbar-none max-w-full">
         <button
           onClick={() => setActiveTab("analytics")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all whitespace-nowrap ${
+          className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-black shrink-0 transition-all whitespace-nowrap ${
             activeTab === "analytics" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
           }`}
         >
@@ -638,7 +638,7 @@ export default function AdminDashboard() {
         </button>
         <button
           onClick={() => setActiveTab("users")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all whitespace-nowrap ${
+          className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-black shrink-0 transition-all whitespace-nowrap ${
             activeTab === "users" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
           }`}
         >
@@ -646,7 +646,7 @@ export default function AdminDashboard() {
         </button>
         <button
           onClick={() => setActiveTab("products")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all whitespace-nowrap ${
+          className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-black shrink-0 transition-all whitespace-nowrap ${
             activeTab === "products" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
           }`}
         >
@@ -654,7 +654,7 @@ export default function AdminDashboard() {
         </button>
         <button
           onClick={() => setActiveTab("orders")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all whitespace-nowrap ${
+          className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-black shrink-0 transition-all whitespace-nowrap ${
             activeTab === "orders" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
           }`}
         >
