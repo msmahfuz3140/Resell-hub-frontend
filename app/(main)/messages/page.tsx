@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, Suspense } from "react";
+import React, { useState, useEffect, useRef, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -14,12 +14,8 @@ import {
   ExternalLink,
   CheckCheck,
   Check,
-  User as UserIcon,
-  Phone,
-  Clock,
   Sparkles,
   Inbox,
-  Filter,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCurrency, timeAgo } from "@/lib/utils";
@@ -45,11 +41,17 @@ function MessagesContent() {
   const [isMobileChatActive, setIsMobileChatActive] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const convPollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const activeConvIdRef = useRef<string | null>(null);
 
-  // Scroll to bottom
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  // Auto-scroll helper
+  const scrollToBottom = useCallback((smooth = true) => {
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: smooth ? "smooth" : "auto" });
+    }, 50);
+  }, []);
 
   // Auth protection
   useEffect(() => {
@@ -60,80 +62,150 @@ function MessagesContent() {
   }, [authLoading, isAuthenticated, router]);
 
   // Fetch all conversations
-  const fetchConversations = async () => {
+  const fetchConversations = useCallback(async (silent = false) => {
     try {
-      setIsConversationsLoading(true);
+      if (!silent) setIsConversationsLoading(true);
       const res = await messageService.getConversations();
       if (res?.data?.conversations) {
-        setConversations(res.data.conversations);
+        const convList = res.data.conversations;
+        setConversations(convList);
 
-        // Select initial conversation
+        // If targetConvId passed in URL, pick it
         if (targetConvId) {
-          const found = res.data.conversations.find((c) => c._id === targetConvId);
+          const found = convList.find((c) => c._id === targetConvId);
           if (found) {
             setActiveConversation(found);
             setIsMobileChatActive(true);
           }
-        } else if (res.data.conversations.length > 0 && !activeConversation) {
-          setActiveConversation(res.data.conversations[0]);
+        } else if (!activeConvIdRef.current && convList.length > 0) {
+          // Default pick the first conversation if none is active
+          setActiveConversation(convList[0]);
         }
       }
-    } catch (err: any) {
-      console.error("Error fetching conversations:", err);
+    } catch (err: unknown) {
+      console.error("[Messages] Error fetching conversations:", err);
     } finally {
-      setIsConversationsLoading(false);
+      if (!silent) setIsConversationsLoading(false);
     }
-  };
+  }, [targetConvId]);
 
+  // Handle targetProductId on mount (e.g. from /listings/xyz)
+  useEffect(() => {
+    if (!isAuthenticated || !targetProductId) return;
+
+    const initProductChat = async () => {
+      try {
+        const res = await messageService.getOrCreateConversation(targetProductId);
+        if (res?.data?.conversation) {
+          const conv = res.data.conversation;
+          setActiveConversation(conv);
+          setIsMobileChatActive(true);
+          fetchConversations(true);
+        }
+      } catch (err: unknown) {
+        console.error("[Messages] Error init product chat:", err);
+      }
+    };
+
+    initProductChat();
+  }, [isAuthenticated, targetProductId, fetchConversations]);
+
+  // Initial load of conversations list
   useEffect(() => {
     if (isAuthenticated) {
-      fetchConversations();
+      fetchConversations(false);
     }
-  }, [isAuthenticated, targetConvId]);
+  }, [isAuthenticated, fetchConversations]);
 
-  // Load messages when active conversation changes
+  // Poll conversations every 4 seconds for new conversations or unread count updates
   useEffect(() => {
-    if (!activeConversation) return;
+    if (!isAuthenticated) return;
+    if (convPollingRef.current) clearInterval(convPollingRef.current);
 
-    let isMounted = true;
-    const fetchMessages = async () => {
-      try {
-        setIsMessagesLoading(true);
-        const res = await messageService.getMessages(activeConversation._id);
-        if (res?.data?.messages && isMounted) {
-          setMessages(res.data.messages);
-        }
-      } catch (err: any) {
-        console.error("Error fetching messages:", err);
-      } finally {
-        if (isMounted) setIsMessagesLoading(false);
-      }
-    };
-
-    fetchMessages();
+    convPollingRef.current = setInterval(() => {
+      fetchConversations(true);
+    }, 4000);
 
     return () => {
-      isMounted = false;
+      if (convPollingRef.current) clearInterval(convPollingRef.current);
     };
-  }, [activeConversation?._id]);
+  }, [isAuthenticated, fetchConversations]);
 
+  // Core: Fetch messages for active conversation
+  const fetchMessagesForActive = useCallback(async (convId: string, showLoader = false) => {
+    if (!convId) return;
+    try {
+      if (showLoader) setIsMessagesLoading(true);
+      const res = await messageService.getMessages(convId);
+      if (res?.data?.messages) {
+        const incoming = res.data.messages as MessageItem[];
+        setMessages((prev) => {
+          // Detect difference: length changed or latest message ID changed
+          const isDiff =
+            incoming.length !== prev.length ||
+            (incoming.length > 0 && incoming[incoming.length - 1]._id !== prev[prev.length - 1]?._id);
+
+          if (isDiff) {
+            scrollToBottom(true);
+            return incoming;
+          }
+          return prev;
+        });
+      }
+    } catch (err: unknown) {
+      console.error("[Messages] fetch messages error:", err);
+    } finally {
+      if (showLoader) setIsMessagesLoading(false);
+    }
+  }, [scrollToBottom]);
+
+  // When active conversation changes, immediately load messages and start 1.5s real-time polling
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (!activeConversation) {
+      if (pollingRef.current) clearInterval(pollingRef.current);
+      activeConvIdRef.current = null;
+      setMessages([]);
+      return;
+    }
+
+    const convId = activeConversation._id;
+    activeConvIdRef.current = convId;
+
+    if (pollingRef.current) clearInterval(pollingRef.current);
+
+    // 1. Immediate fetch
+    fetchMessagesForActive(convId, true);
+    scrollToBottom(false);
+
+    // 2. Real-time fast polling every 1.5 seconds (like messenger)
+    pollingRef.current = setInterval(() => {
+      const currentId = activeConvIdRef.current;
+      if (currentId) {
+        fetchMessagesForActive(currentId, false);
+      }
+    }, 1500);
+
+    return () => {
+      if (pollingRef.current) clearInterval(pollingRef.current);
+    };
+  }, [activeConversation?._id, fetchMessagesForActive, scrollToBottom]);
 
   // Handle Send Message
   const handleSendMessage = async (textToSend?: string) => {
     const text = (textToSend || messageInput).trim();
     if (!text || !activeConversation) return;
 
+    const convId = activeConversation._id;
+
     try {
       setIsSending(true);
       setMessageInput("");
 
-      // Optimistic message
+      // 1. Optimistic message — instant display
+      const tempId = `temp_${Date.now()}`;
       const optimisticMsg: MessageItem = {
-        _id: `temp_${Date.now()}`,
-        conversation: activeConversation._id,
+        _id: tempId,
+        conversation: convId,
         sender: {
           _id: user?._id || "current_user",
           name: user?.name || "You",
@@ -148,25 +220,31 @@ function MessagesContent() {
       };
 
       setMessages((prev) => [...prev, optimisticMsg]);
+      scrollToBottom(true);
 
-      // Update conversations list last message
+      // Update conversations sidebar last message
       setConversations((prev) =>
         prev.map((c) =>
-          c._id === activeConversation._id
+          c._id === convId
             ? { ...c, lastMessage: optimisticMsg, lastMessageAt: new Date().toISOString() }
             : c
         )
       );
 
-      const res = await messageService.sendMessage(activeConversation._id, text);
-      const serverMsg = res?.data?.message;
-      if (serverMsg) {
-        setMessages((prev) =>
-          prev.map((m) => (m._id === optimisticMsg._id ? serverMsg : m))
-        );
-      }
-    } catch (err: any) {
-      console.error("Error sending message:", err);
+      // 2. Send to backend
+      await messageService.sendMessage(convId, text);
+
+      // 3. Immediately re-fetch real message
+      await fetchMessagesForActive(convId, false);
+      scrollToBottom(true);
+
+      // 4. Also refresh sidebar conversations in background
+      fetchConversations(true);
+    } catch (err: unknown) {
+      console.error("[Messages] send message error:", err);
+      toast.error("Failed to send message. Please try again.");
+      setMessages((prev) => prev.filter((m) => !m._id.startsWith("temp_")));
+      setMessageInput(text);
     } finally {
       setIsSending(false);
     }
@@ -182,50 +260,50 @@ function MessagesContent() {
 
   if (authLoading) {
     return (
-      <div className="min-h-[75vh] flex items-center justify-center bg-slate-50">
+      <div className="min-h-[75vh] flex items-center justify-center bg-slate-50 dark:bg-slate-950">
         <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-[calc(100vh-80px)] bg-slate-50/70 py-4 sm:py-6">
+    <div className="min-h-[calc(100vh-80px)] bg-slate-50/70 dark:bg-slate-950/70 py-4 sm:py-6 transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* ── Header Strip ── */}
         <div className="flex items-center justify-between mb-4 sm:mb-6">
           <div className="flex items-center gap-3">
             <Link
               href="/dashboard"
-              className="p-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:text-indigo-600 transition shadow-xs"
+              className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition shadow-xs"
             >
               <ArrowLeft className="w-4 h-4" />
             </Link>
             <div>
-              <h1 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-                <Inbox className="w-6 h-6 text-indigo-600" /> Messages & Chat Inbox
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <Inbox className="w-6 h-6 text-indigo-600 dark:text-indigo-400" /> Messages & Chat Inbox
               </h1>
-              <p className="text-xs text-slate-500 font-medium">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                 Communicate directly with buyers and sellers in real-time.
               </p>
             </div>
           </div>
 
-          <div className="hidden sm:flex items-center gap-2 text-xs font-bold text-emerald-700 bg-emerald-50 px-3.5 py-1.5 rounded-full border border-emerald-200 shadow-xs">
-            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+          <div className="hidden sm:flex items-center gap-2 text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-3.5 py-1.5 rounded-full border border-emerald-200 dark:border-emerald-800/60 shadow-xs">
+            <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             <span>Escrow Protected Chat</span>
           </div>
         </div>
 
         {/* ── Inbox Main Window ── */}
-        <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 h-[720px] max-h-[82vh]">
-          {/* ── Left Column: Conversations List (Hidden on mobile if chat is active) ── */}
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 h-[720px] max-h-[82vh]">
+          {/* ── Left Column: Conversations List ── */}
           <div
-            className={`lg:col-span-5 border-r border-slate-200 flex flex-col h-full bg-slate-50/40 ${
+            className={`lg:col-span-5 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full bg-slate-50/40 dark:bg-slate-950/40 ${
               isMobileChatActive ? "hidden lg:flex" : "flex"
             }`}
           >
             {/* Search Box */}
-            <div className="p-3.5 sm:p-4 border-b border-slate-200 bg-white">
+            <div className="p-3.5 sm:p-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
               <div className="relative">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
@@ -233,28 +311,28 @@ function MessagesContent() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search chats by name or item..."
-                  className="w-full pl-9.5 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition"
+                  className="w-full pl-9.5 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition"
                 />
               </div>
             </div>
 
             {/* Conversation Items */}
-            <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
-              {isConversationsLoading ? (
+            <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60">
+              {isConversationsLoading && conversations.length === 0 ? (
                 <div className="p-8 text-center space-y-3">
-                  <Loader2 className="w-7 h-7 text-indigo-600 animate-spin mx-auto" />
+                  <Loader2 className="w-7 h-7 text-indigo-600 dark:text-indigo-400 animate-spin mx-auto" />
                   <p className="text-xs font-bold text-slate-400">Loading inbox conversations...</p>
                 </div>
               ) : filteredConversations.length === 0 ? (
                 <div className="p-10 text-center text-slate-400 space-y-2">
                   <MessageSquare className="w-10 h-10 mx-auto opacity-40 text-indigo-400" />
-                  <h4 className="text-sm font-black text-slate-800">No Messages Yet</h4>
+                  <h4 className="text-sm font-black text-slate-800 dark:text-slate-200">No Messages Yet</h4>
                   <p className="text-xs text-slate-400 max-w-[220px] mx-auto">
                     When you chat with a seller or receive buyer inquiries, they will appear here.
                   </p>
                   <Link
                     href="/listings"
-                    className="inline-block mt-3 px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 transition shadow-xs"
+                    className="inline-block mt-3 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-xs"
                   >
                     Browse Listings
                   </Link>
@@ -275,8 +353,8 @@ function MessagesContent() {
                       }}
                       className={`w-full p-3.5 sm:p-4 text-left flex items-start gap-3 transition-colors cursor-pointer ${
                         isSelected
-                          ? "bg-indigo-50/80 border-l-4 border-indigo-600"
-                          : "hover:bg-slate-100/70"
+                          ? "bg-indigo-50/80 dark:bg-indigo-950/60 border-l-4 border-indigo-600"
+                          : "hover:bg-slate-100/70 dark:hover:bg-slate-800/50"
                       }`}
                     >
                       {/* Avatar */}
@@ -288,13 +366,13 @@ function MessagesContent() {
                         ) : (
                           other?.name?.[0]?.toUpperCase() || "U"
                         )}
-                        <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-white" />
+                        <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-white dark:ring-slate-900" />
                       </div>
 
                       {/* Info & Last Message */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-1 mb-0.5">
-                          <h4 className="text-xs font-black text-slate-900 truncate">
+                          <h4 className="text-xs font-black text-slate-900 dark:text-white truncate">
                             {other?.name || "Marketplace User"}
                           </h4>
                           <span className="text-[10px] font-semibold text-slate-400 shrink-0">
@@ -304,14 +382,14 @@ function MessagesContent() {
 
                         {/* Product Tag */}
                         {prod && (
-                          <div className="flex items-center gap-1.5 mb-1 text-[11px] font-bold text-indigo-600 bg-indigo-50/90 px-2 py-0.5 rounded-md w-fit truncate max-w-[200px]">
+                          <div className="flex items-center gap-1.5 mb-1 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50/90 dark:bg-indigo-950/60 px-2 py-0.5 rounded-md w-fit truncate max-w-[200px]">
                             <ShoppingBag className="w-3 h-3 shrink-0" />
                             <span className="truncate">{prod.title}</span>
                           </div>
                         )}
 
                         {/* Last Message Snippet */}
-                        <p className="text-xs text-slate-500 truncate font-medium">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate font-medium">
                           {conv.lastMessage?.content || "Tap to chat..."}
                         </p>
                       </div>
@@ -331,19 +409,19 @@ function MessagesContent() {
 
           {/* ── Right Column: Active Chat Thread ── */}
           <div
-            className={`lg:col-span-7 flex flex-col h-full bg-white ${
+            className={`lg:col-span-7 flex flex-col h-full bg-white dark:bg-slate-900 ${
               !isMobileChatActive ? "hidden lg:flex" : "flex"
             }`}
           >
             {activeConversation ? (
               <>
                 {/* ── Chat Header ── */}
-                <div className="p-3.5 sm:p-4 border-b border-slate-200 flex items-center justify-between gap-3 bg-white shrink-0">
+                <div className="p-3.5 sm:p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 bg-white dark:bg-slate-900 shrink-0">
                   <div className="flex items-center gap-3 min-w-0">
                     <button
                       type="button"
                       onClick={() => setIsMobileChatActive(false)}
-                      className="lg:hidden p-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-slate-900"
+                      className="lg:hidden p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900"
                     >
                       <ArrowLeft className="w-4 h-4" />
                     </button>
@@ -358,20 +436,20 @@ function MessagesContent() {
                       ) : (
                         activeConversation.otherParticipant?.name?.[0]?.toUpperCase() || "U"
                       )}
-                      <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-white" />
+                      <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-white dark:ring-slate-900" />
                     </div>
 
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <h3 className="text-sm font-black text-slate-900 truncate">
+                        <h3 className="text-sm font-black text-slate-900 dark:text-white truncate">
                           {activeConversation.otherParticipant?.name || "Marketplace User"}
                         </h3>
-                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                        <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.2 rounded border border-emerald-200 dark:border-emerald-800/60">
                           Verified
                         </span>
                       </div>
                       <p className="text-[11px] text-slate-400 font-semibold truncate">
-                        {activeConversation.otherParticipant?.email || "Direct Marketplace Inquiries"}
+                        {activeConversation.otherParticipant?.email || "Direct Inquiries"}
                       </p>
                     </div>
                   </div>
@@ -379,7 +457,7 @@ function MessagesContent() {
                   {activeConversation.product && (
                     <Link
                       href={`/listings/${activeConversation.product._id}`}
-                      className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 text-xs font-bold transition border border-slate-200/80 shrink-0"
+                      className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 text-xs font-bold transition border border-slate-200/80 dark:border-slate-700 shrink-0"
                     >
                       <span>View Listing</span>
                       <ExternalLink className="w-3.5 h-3.5" />
@@ -389,9 +467,9 @@ function MessagesContent() {
 
                 {/* ── Product Pinned Bar ── */}
                 {activeConversation.product && (
-                  <div className="px-4 py-2.5 bg-indigo-50/70 border-b border-indigo-100 flex items-center justify-between gap-3 shrink-0">
+                  <div className="px-4 py-2.5 bg-indigo-50/70 dark:bg-indigo-950/40 border-b border-indigo-100 dark:border-indigo-800/60 flex items-center justify-between gap-3 shrink-0">
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 overflow-hidden shrink-0">
+                      <div className="w-9 h-9 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0">
                         {activeConversation.product.images?.[0]?.url ? (
                           <img
                             src={activeConversation.product.images[0].url}
@@ -405,10 +483,10 @@ function MessagesContent() {
                         )}
                       </div>
                       <div className="min-w-0">
-                        <h4 className="text-xs font-black text-slate-900 truncate max-w-[200px] sm:max-w-xs">
+                        <h4 className="text-xs font-black text-slate-900 dark:text-white truncate max-w-[200px] sm:max-w-xs">
                           {activeConversation.product.title}
                         </h4>
-                        <span className="text-xs font-black text-indigo-600">
+                        <span className="text-xs font-black text-indigo-600 dark:text-indigo-400">
                           {formatCurrency(activeConversation.product.price)}
                         </span>
                       </div>
@@ -424,16 +502,16 @@ function MessagesContent() {
                 )}
 
                 {/* ── Message Feed ── */}
-                <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50/50">
-                  {isMessagesLoading ? (
+                <div ref={scrollContainerRef} className="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50/50 dark:bg-slate-950/50">
+                  {isMessagesLoading && messages.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center gap-2 text-slate-400">
-                      <Loader2 className="w-6 h-6 animate-spin text-indigo-600" />
+                      <Loader2 className="w-6 h-6 animate-spin text-indigo-600 dark:text-indigo-400" />
                       <span className="text-xs font-bold">Loading message history...</span>
                     </div>
                   ) : messages.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400 space-y-2">
                       <Sparkles className="w-8 h-8 text-indigo-400" />
-                      <h4 className="text-sm font-black text-slate-800">Start the conversation!</h4>
+                      <h4 className="text-sm font-black text-slate-800 dark:text-slate-200">Start the conversation!</h4>
                       <p className="text-xs max-w-xs">
                         Say hi, negotiate the price, or ask for product specifications.
                       </p>
@@ -441,7 +519,10 @@ function MessagesContent() {
                   ) : (
                     <>
                       {messages.map((msg) => {
-                        const isMe = msg.sender?._id === user?._id || msg.sender?._id === "current_user";
+                        const isMe =
+                          msg.sender?._id?.toString() === user?._id?.toString() ||
+                          msg.sender?.email === user?.email ||
+                          msg.sender?._id === "current_user";
 
                         return (
                           <div
@@ -452,10 +533,10 @@ function MessagesContent() {
                               className={`max-w-[80%] sm:max-w-[70%] rounded-2xl px-4 py-2.5 text-xs font-medium leading-relaxed shadow-xs ${
                                 isMe
                                   ? "bg-indigo-600 text-white rounded-br-xs"
-                                  : "bg-white text-slate-800 border border-slate-200/90 rounded-bl-xs"
+                                  : "bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200/90 dark:border-slate-700 rounded-bl-xs"
                               }`}
                             >
-                              <p className="whitespace-pre-wrap wrap-break-words">{msg.content}</p>
+                              <p className="whitespace-pre-wrap break-words">{msg.content}</p>
                             </div>
 
                             <div className="flex items-center gap-1 mt-1 text-[10px] text-slate-400 font-semibold px-1">
@@ -463,7 +544,7 @@ function MessagesContent() {
                               {isMe && (
                                 <span>
                                   {msg.isRead ? (
-                                    <CheckCheck className="w-3 h-3 text-indigo-600 inline" />
+                                    <CheckCheck className="w-3 h-3 text-indigo-600 dark:text-indigo-400 inline" />
                                   ) : (
                                     <Check className="w-3 h-3 text-slate-400 inline" />
                                   )}
@@ -479,7 +560,7 @@ function MessagesContent() {
                 </div>
 
                 {/* ── Input Bar ── */}
-                <div className="p-3 sm:p-4 bg-white border-t border-slate-200 shrink-0">
+                <div className="p-3 sm:p-4 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shrink-0">
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
@@ -492,7 +573,7 @@ function MessagesContent() {
                       value={messageInput}
                       onChange={(e) => setMessageInput(e.target.value)}
                       placeholder="Type your message..."
-                      className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-semibold text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition"
+                      className="flex-1 px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-semibold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition"
                     />
                     <button
                       type="submit"
@@ -510,10 +591,10 @@ function MessagesContent() {
               </>
             ) : (
               <div className="h-full flex flex-col items-center justify-center text-center p-8 text-slate-400 space-y-3">
-                <div className="w-16 h-16 rounded-3xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <div className="w-16 h-16 rounded-3xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
                   <Inbox className="w-8 h-8" />
                 </div>
-                <h3 className="text-base font-black text-slate-900">Select a Conversation</h3>
+                <h3 className="text-base font-black text-slate-900 dark:text-white">Select a Conversation</h3>
                 <p className="text-xs text-slate-400 max-w-xs">
                   Choose a chat from the inbox list on the left to read and send messages.
                 </p>
@@ -530,7 +611,7 @@ export default function MessagesPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
           <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
         </div>
       }

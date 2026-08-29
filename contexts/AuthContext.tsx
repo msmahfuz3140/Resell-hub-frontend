@@ -26,6 +26,7 @@ interface AuthContextType {
   googleLogin: () => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  updateUser: (partial: Partial<User>) => void;
 }
 
 // ─── Context ──────────────────────────────────────
@@ -226,6 +227,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     clearAll();
   }, []);
 
+  // ── updateUser (local patch) ─────────────────────
+  const updateUser = useCallback((partial: Partial<User>) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const merged = { ...prev, ...partial };
+      saveUser(merged);
+      return merged;
+    });
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -237,6 +248,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         googleLogin,
         logout,
         refreshUser,
+        updateUser,
       }}
     >
       {children}

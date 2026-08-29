@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import {
   X,
@@ -13,7 +13,6 @@ import {
   Sparkles,
   CheckCheck,
   Check,
-  User as UserIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCurrency, timeAgo } from "@/lib/utils";
@@ -43,15 +42,54 @@ export default function ChatWithSellerModal({
   const [messageText, setMessageText] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const activeConvIdRef = useRef<string | null>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  const scrollToBottom = useCallback((smooth = true) => {
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: smooth ? "smooth" : "auto" });
+    }, 50);
+  }, []);
 
-  // Fetch or create conversation on open
+  // Fetch messages function
+  const fetchMessagesForConv = useCallback(async (convId: string, showLoader = false) => {
+    if (!convId) return;
+    try {
+      if (showLoader) setIsLoading(true);
+      const res = await messageService.getMessages(convId);
+      if (res?.data?.messages) {
+        const incoming = res.data.messages as MessageItem[];
+        setMessages((prev) => {
+          // If message count or latest ID changed, update
+          const isDiff =
+            incoming.length !== prev.length ||
+            (incoming.length > 0 && incoming[incoming.length - 1]._id !== prev[prev.length - 1]?._id);
+          if (isDiff) {
+            scrollToBottom(true);
+            return incoming;
+          }
+          return prev;
+        });
+      }
+    } catch (err: unknown) {
+      console.error("Fetch messages error in modal:", err);
+    } finally {
+      if (showLoader) setIsLoading(false);
+    }
+  }, [scrollToBottom]);
+
+  // Init chat on modal open
   useEffect(() => {
-    if (!isOpen || !product) return;
+    if (!isOpen || !product) {
+      if (pollingRef.current) clearInterval(pollingRef.current);
+      activeConvIdRef.current = null;
+      setConversation(null);
+      setMessages([]);
+      return;
+    }
 
     let isMounted = true;
     const initChat = async () => {
@@ -61,15 +99,24 @@ export default function ChatWithSellerModal({
         const convRes = await messageService.getOrCreateConversation(product._id, sellerId);
 
         if (convRes?.data?.conversation && isMounted) {
-          setConversation(convRes.data.conversation);
-          const msgRes = await messageService.getMessages(convRes.data.conversation._id);
-          if (msgRes?.data?.messages && isMounted) {
-            setMessages(msgRes.data.messages);
-          }
+          const conv = convRes.data.conversation;
+          setConversation(conv);
+          activeConvIdRef.current = conv._id;
+
+          // Initial fetch
+          await fetchMessagesForConv(conv._id, true);
+          scrollToBottom(false);
+
+          // Real-time polling every 1.5s while modal is open
+          if (pollingRef.current) clearInterval(pollingRef.current);
+          pollingRef.current = setInterval(() => {
+            if (activeConvIdRef.current) {
+              fetchMessagesForConv(activeConvIdRef.current, false);
+            }
+          }, 1500);
         }
-      } catch (err: any) {
-        console.error("Chat init error:", err);
-        // If simulated/demo fallback
+      } catch (err: unknown) {
+        console.error("Chat init error in modal:", err);
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -79,12 +126,10 @@ export default function ChatWithSellerModal({
 
     return () => {
       isMounted = false;
+      if (pollingRef.current) clearInterval(pollingRef.current);
+      activeConvIdRef.current = null;
     };
-  }, [isOpen, product]);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  }, [isOpen, product, fetchMessagesForConv, scrollToBottom]);
 
   const handleSendMessage = async (textToSend?: string) => {
     const text = (textToSend || messageText).trim();
@@ -95,14 +140,17 @@ export default function ChatWithSellerModal({
       return;
     }
 
+    const convId = conversation._id;
+
     try {
       setIsSending(true);
       setMessageText("");
 
-      // Optimistic message
+      // 1. Instant optimistic UI
+      const tempId = `temp_${Date.now()}`;
       const optimisticMsg: MessageItem = {
-        _id: `temp_${Date.now()}`,
-        conversation: conversation._id,
+        _id: tempId,
+        conversation: convId,
         sender: {
           _id: user?._id || "current_user",
           name: user?.name || "You",
@@ -117,18 +165,19 @@ export default function ChatWithSellerModal({
       };
 
       setMessages((prev) => [...prev, optimisticMsg]);
+      scrollToBottom(true);
 
-      const res = await messageService.sendMessage(conversation._id, text);
-      const serverMsg = res?.data?.message;
-      if (serverMsg) {
-        setMessages((prev) =>
-          prev.map((m) => (m._id === optimisticMsg._id ? serverMsg : m))
-        );
-        toast.success("Message sent to seller's inbox! 📩");
-      }
-    } catch (err: any) {
-      console.error("Send message error:", err);
-      toast.success("Message delivered to seller's inbox! 📩");
+      // 2. Send to backend
+      await messageService.sendMessage(convId, text);
+
+      // 3. Immediately sync
+      await fetchMessagesForConv(convId, false);
+      scrollToBottom(true);
+    } catch (err: unknown) {
+      console.error("Send message error in modal:", err);
+      toast.error("Failed to send message. Please try again.");
+      setMessages((prev) => prev.filter((m) => !m._id.startsWith("temp_")));
+      setMessageText(text);
     } finally {
       setIsSending(false);
     }
@@ -143,9 +192,9 @@ export default function ChatWithSellerModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
       <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[620px] max-h-[90vh] border border-slate-200/90 animate-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[620px] max-h-[90vh] border border-slate-200/90 dark:border-slate-800 animate-in zoom-in-95 duration-200">
         {/* ── Chat Header ── */}
-        <div className="p-4 sm:p-5 bg-linear-to-r from-indigo-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between shrink-0 shadow-md">
+        <div className="p-4 sm:p-5 bg-gradient-to-r from-indigo-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between shrink-0 shadow-md">
           <div className="flex items-center gap-3 min-w-0">
             <div className="relative w-10 h-10 rounded-2xl bg-indigo-600 border border-white/20 flex items-center justify-center text-white font-black overflow-hidden shrink-0">
               {sellerPhoto ? (
@@ -165,14 +214,14 @@ export default function ChatWithSellerModal({
               </div>
               <p className="text-[11px] text-slate-300 truncate flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span>Active • Instant Reply</span>
+                <span>Active • Instant Chat</span>
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-1.5">
             <Link
-              href="/messages"
+              href={conversation ? `/messages?id=${conversation._id}` : "/messages"}
               className="p-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition"
               title="Open full inbox"
             >
@@ -189,9 +238,9 @@ export default function ChatWithSellerModal({
         </div>
 
         {/* ── Product Pinned Mini Bar ── */}
-        <div className="p-3 bg-indigo-50/70 border-b border-indigo-100 flex items-center justify-between gap-3 shrink-0">
+        <div className="p-3 bg-indigo-50/70 dark:bg-indigo-950/40 border-b border-indigo-100 dark:border-indigo-800/60 flex items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 overflow-hidden shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0">
               {product.images?.[0]?.url ? (
                 <img src={product.images[0].url} alt="" className="w-full h-full object-cover" />
               ) : (
@@ -201,8 +250,8 @@ export default function ChatWithSellerModal({
               )}
             </div>
             <div className="min-w-0">
-              <h4 className="text-xs font-black text-slate-900 truncate max-w-[220px]">{product.title}</h4>
-              <p className="text-xs font-black text-indigo-600">{formatCurrency(product.price)}</p>
+              <h4 className="text-xs font-black text-slate-900 dark:text-white truncate max-w-[220px]">{product.title}</h4>
+              <p className="text-xs font-black text-indigo-600 dark:text-indigo-400">{formatCurrency(product.price)}</p>
             </div>
           </div>
 
@@ -215,18 +264,18 @@ export default function ChatWithSellerModal({
         </div>
 
         {/* ── Message Thread ── */}
-        <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50/60">
+        <div ref={scrollAreaRef} className="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50/60 dark:bg-slate-950/60">
           {isLoading ? (
             <div className="h-full flex flex-col items-center justify-center gap-2 text-slate-400">
-              <Loader2 className="w-6 h-6 animate-spin text-indigo-600" />
+              <Loader2 className="w-6 h-6 animate-spin text-indigo-600 dark:text-indigo-400" />
               <span className="text-xs font-bold">Connecting with seller...</span>
             </div>
           ) : messages.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center p-4 text-slate-500">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3">
+            <div className="h-full flex flex-col items-center justify-center text-center p-4 text-slate-500 dark:text-slate-400">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-3">
                 <MessageSquare className="w-6 h-6" />
               </div>
-              <h4 className="text-sm font-black text-slate-900 mb-1">Start Conversation</h4>
+              <h4 className="text-sm font-black text-slate-900 dark:text-white mb-1">Start Conversation</h4>
               <p className="text-xs text-slate-400 max-w-xs mb-4">
                 Ask about availability, negotiate pricing, or arrange pickup details with {sellerName}.
               </p>
@@ -242,7 +291,7 @@ export default function ChatWithSellerModal({
                       key={i}
                       type="button"
                       onClick={() => handleSendMessage(msg)}
-                      className="text-left text-xs font-semibold text-slate-700 bg-white hover:bg-indigo-50 hover:text-indigo-600 p-2 rounded-xl border border-slate-200 hover:border-indigo-200 transition text-truncate cursor-pointer"
+                      className="text-left text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 hover:text-indigo-600 dark:hover:text-indigo-400 p-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-indigo-200 dark:hover:border-indigo-700 transition cursor-pointer"
                     >
                       {msg}
                     </button>
@@ -253,7 +302,10 @@ export default function ChatWithSellerModal({
           ) : (
             <>
               {messages.map((msg) => {
-                const isMe = msg.sender?._id === user?._id || msg.sender?._id === "current_user";
+                const isMe =
+                  msg.sender?._id?.toString() === user?._id?.toString() ||
+                  msg.sender?.email === user?.email ||
+                  msg.sender?._id === "current_user";
 
                 return (
                   <div
@@ -264,10 +316,10 @@ export default function ChatWithSellerModal({
                       className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-xs font-medium leading-relaxed shadow-xs ${
                         isMe
                           ? "bg-indigo-600 text-white rounded-br-xs"
-                          : "bg-white text-slate-800 border border-slate-200/90 rounded-bl-xs"
+                          : "bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200/90 dark:border-slate-700 rounded-bl-xs"
                       }`}
                     >
-                      <p className="whitespace-pre-wrap wrap-break-words">{msg.content}</p>
+                      <p className="whitespace-pre-wrap break-words">{msg.content}</p>
                     </div>
 
                     <div className="flex items-center gap-1 mt-1 text-[10px] text-slate-400 font-semibold px-1">
@@ -275,7 +327,7 @@ export default function ChatWithSellerModal({
                       {isMe && (
                         <span>
                           {msg.isRead ? (
-                            <CheckCheck className="w-3 h-3 text-indigo-600 inline" />
+                            <CheckCheck className="w-3 h-3 text-indigo-600 dark:text-indigo-400 inline" />
                           ) : (
                             <Check className="w-3 h-3 text-slate-400 inline" />
                           )}
@@ -291,7 +343,7 @@ export default function ChatWithSellerModal({
         </div>
 
         {/* ── Message Input Bar ── */}
-        <div className="p-3 bg-white border-t border-slate-200 shrink-0">
+        <div className="p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shrink-0">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -304,7 +356,7 @@ export default function ChatWithSellerModal({
               value={messageText}
               onChange={(e) => setMessageText(e.target.value)}
               placeholder={`Message ${sellerName}...`}
-              className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-semibold text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition"
+              className="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-semibold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition"
             />
             <button
               type="submit"
