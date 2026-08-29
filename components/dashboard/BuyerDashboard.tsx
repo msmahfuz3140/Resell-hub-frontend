@@ -26,6 +26,7 @@ import {
   ArrowUpRight,
   ShieldCheck,
   Ban,
+  MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCurrency, timeAgo } from "@/lib/utils";
@@ -554,6 +555,12 @@ export default function BuyerDashboard({ user, onRefreshUser }: { user: User | n
         >
           <CreditCard size={14} /> Payment History
         </button>
+        <Link
+          href="/messages"
+          className="flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-black shrink-0 text-slate-600 hover:bg-slate-100 transition-all whitespace-nowrap"
+        >
+          <MessageSquare size={14} /> Messages & Chat
+        </Link>
         <button
           onClick={() => setActiveTab("profile")}
           className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-black shrink-0 transition-all whitespace-nowrap ${

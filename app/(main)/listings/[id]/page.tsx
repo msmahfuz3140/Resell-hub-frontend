@@ -34,6 +34,7 @@ import { productService } from "@/services/productService";
 import { useAuth } from "@/contexts/AuthContext";
 import { isLocalFavorite, toggleLocalFavorite } from "@/lib/favorites";
 import { findCustomProductById } from "@/lib/customProducts";
+import ChatWithSellerModal from "@/components/chat/ChatWithSellerModal";
 import type { Product } from "@/types";
 
 // ─── Review Types ─────────────────────────────────
@@ -451,6 +452,7 @@ export default function ProductDetailPage() {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isFavorited, setIsFavorited] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
+  const [isChatModalOpen, setIsChatModalOpen] = useState(false);
 
   // Fetch product with fallback support
   const fetchProduct = useCallback(async () => {
@@ -610,11 +612,10 @@ export default function ProductDetailPage() {
   const handleChat = () => {
     if (!isAuthenticated) {
       toast.error("Please login to message the seller.");
-      router.push("/login");
+      router.push(`/login?redirect=/listings/${product?._id || id}`);
       return;
     }
-    toast.info(`Connecting with seller ${product?.sellerInfo?.name}...`);
-    router.push("/dashboard");
+    setIsChatModalOpen(true);
   };
 
   // ── Loading ──
@@ -1150,6 +1151,15 @@ export default function ProductDetailPage() {
           </div>
         )}
       </div>
+
+      {/* ── Interactive Chat With Seller Modal ── */}
+      {product && (
+        <ChatWithSellerModal
+          product={product}
+          isOpen={isChatModalOpen}
+          onClose={() => setIsChatModalOpen(false)}
+        />
+      )}
     </div>
   );
 }

@@ -22,6 +22,7 @@ import {
   Compass,
   ArrowRight,
   ShieldCheck,
+  MessageSquare,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -194,6 +195,14 @@ export default function Navbar() {
                         >
                           <LayoutDashboard size={15} className="text-indigo-600" />
                           <span>Dashboard & Activity</span>
+                        </Link>
+                        <Link
+                          href="/messages"
+                          onClick={() => setDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-100 transition-colors"
+                        >
+                          <MessageSquare size={15} className="text-indigo-600" />
+                          <span>Messages & Chat</span>
                         </Link>
                         <Link
                           href="/my-orders"
