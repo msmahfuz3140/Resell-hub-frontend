@@ -112,6 +112,31 @@ function StripePaymentForm({
           </span>
         </div>
 
+        {/* Test Mode Card Helper Banner */}
+        <div className="mb-4 p-3 bg-amber-50/90 border border-amber-200/90 rounded-xl">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-black text-amber-900 flex items-center gap-1.5 uppercase tracking-wider">
+              🧪 Stripe Test Mode Card Info
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                navigator.clipboard.writeText("4242424242424242");
+                toast.success("Test card number (4242...) copied!");
+              }}
+              className="text-[10px] font-bold text-indigo-600 bg-white px-2 py-0.5 rounded border border-indigo-200 hover:bg-indigo-50 cursor-pointer transition"
+            >
+              Copy Test Card
+            </button>
+          </div>
+          <div className="mt-1.5 text-[11px] text-amber-800 flex flex-wrap items-center gap-x-4 gap-y-1 font-semibold">
+            <span>Card: <code className="bg-white/80 px-1 py-0.5 rounded font-mono font-bold text-slate-900">4242 4242 4242 4242</code></span>
+            <span>MM/YY: <strong className="text-slate-900">12/28</strong></span>
+            <span>CVC: <strong className="text-slate-900">123</strong></span>
+            <span>ZIP: <strong className="text-slate-900">1200</strong></span>
+          </div>
+        </div>
+
         {/* Stripe Elements Container */}
         <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs">
           <PaymentElement
