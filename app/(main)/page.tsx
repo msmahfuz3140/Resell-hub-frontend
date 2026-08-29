@@ -452,23 +452,22 @@ export default function HomePage() {
   const [selectedCity, setSelectedCity] = useState("All Bangladesh");
   const [activeCategoryTab, setActiveCategoryTab] = useState<string>("All");
 
-  const [products, setProducts] = useState<Product[]>(FALLBACK_FEATURED_PRODUCTS);
-  const [loadingProducts, setLoadingProducts] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
 
   // Dynamic fetch from backend
   useEffect(() => {
     const fetchFeatured = async () => {
-      const custom = getCustomProducts();
       try {
         setLoadingProducts(true);
         const data = await productService.getFeaturedProducts();
-        if (data.success && data.data?.products && data.data.products.length > 0) {
-          setProducts([...custom, ...data.data.products]);
+        if (data.success && data.data?.products) {
+          setProducts(data.data.products);
         } else {
-          setProducts([...custom, ...FALLBACK_FEATURED_PRODUCTS]);
+          setProducts([]);
         }
       } catch {
-        setProducts([...custom, ...FALLBACK_FEATURED_PRODUCTS]);
+        setProducts([]);
       } finally {
         setLoadingProducts(false);
       }

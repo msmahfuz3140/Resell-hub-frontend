@@ -357,14 +357,12 @@ function ListingsContent() {
       setProducts(data.data || []);
       setMeta(data.meta || { page: 1, limit: 12, total: (data.data || []).length, totalPages: 1, hasNextPage: false, hasPrevPage: false });
     } catch {
-      // Fallback only if backend completely unreachable
-      const fallback = getFilteredFallback();
-      setProducts(fallback);
-      setMeta({ page: 1, limit: 12, total: fallback.length, totalPages: 1, hasNextPage: false, hasPrevPage: false });
+      setProducts([]);
+      setMeta({ page: 1, limit: 12, total: 0, totalPages: 1, hasNextPage: false, hasPrevPage: false });
     } finally {
       setIsLoading(false);
     }
-  }, [debouncedSearch, selectedCategory, selectedCondition, debouncedPriceMax, sortBy, page, getFilteredFallback]);
+  }, [debouncedSearch, selectedCategory, selectedCondition, debouncedPriceMax, sortBy, page]);
 
   useEffect(() => {
     fetchProducts();

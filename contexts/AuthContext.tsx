@@ -158,26 +158,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(data.data.user);
         return;
       }
-    } catch {
-      // Fallback to local session if backend unreachable
+      throw new Error(data.message || "Invalid credentials.");
+    } catch (err: unknown) {
+      const errorMsg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        (err instanceof Error ? err.message : "Unable to connect to backend server. Please verify NEXT_PUBLIC_API_URL.");
+      throw new Error(errorMsg);
     }
-
-    // Determine role from email
-    const role: "buyer" | "seller" | "admin" = email.includes("admin")
-      ? "admin"
-      : email.includes("seller")
-      ? "seller"
-      : "buyer";
-
-    const prettyName = email
-      .split("@")[0]
-      .replace(/[._-]/g, " ")
-      .replace(/\b\w/g, (c) => c.toUpperCase());
-
-    const localUser = createLocalUser(prettyName, email, role);
-    saveToken(`local_${Date.now()}`);
-    saveUser(localUser);
-    setUser(localUser);
   }, []);
 
   // ── Register ────────────────────────────────────
@@ -196,43 +183,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(data.data.user);
           return;
         }
-      } catch {
-        // Fallback to local session if backend unreachable
+        throw new Error(data.message || "Registration failed.");
+      } catch (err: unknown) {
+        const errorMsg =
+          (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+          (err instanceof Error ? err.message : "Unable to connect to backend server. Please verify NEXT_PUBLIC_API_URL.");
+        throw new Error(errorMsg);
       }
-
-      const role = (formData.role === "seller" ? "seller" : formData.role === "admin" ? "admin" : "buyer") as
-        | "buyer"
-        | "seller"
-        | "admin";
-
-      const localUser = createLocalUser(formData.name, formData.email, role);
-      saveToken(`local_${Date.now()}`);
-      saveUser(localUser);
-      setUser(localUser);
     },
     []
   );
 
-  // ── Google Login ────────────────────────────────
+  // ── Google Login (Real OAuth Picker) ────────────
   const googleLogin = useCallback(async () => {
-    const googleUser = createLocalUser(
-      "Google User",
-      "user@gmail.com",
-      "buyer",
-      "google"
-    );
-    googleUser.photo = {
-      url: "https://lh3.googleusercontent.com/a/default-user=s96-c",
-      publicId: null,
-    };
-    saveToken(`google_${Date.now()}`);
-    saveUser(googleUser);
-    setUser(googleUser);
+    try {
+      const { triggerGoogleOAuth } = await import("@/lib/googleAuth");
+      const token = await triggerGoogleOAuth();
+      const data = await authService.googleAuth(token);
+      if (data.success && data.data) {
+        saveToken(data.data.accessToken);
+        saveUser(data.data.user);
+        setUser(data.data.user);
+        return;
+      }
+      throw new Error(data.message || "Google authentication failed.");
+    } catch (err: unknown) {
+      const errorMsg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        (err instanceof Error ? err.message : "Google sign-in failed. Please try again.");
+      throw new Error(errorMsg);
+    }
   }, []);
 
   // ── Logout ──────────────────────────────────────
   const logout = useCallback(async () => {
-    // Try API logout silently
     try {
       await withTimeout(authService.logout(), 2000);
     } catch {

@@ -51,16 +51,28 @@ function LoginContent() {
   } = useForm<LoginFormData>({ resolver: zodResolver(loginSchema) });
 
   const onSubmit = async (data: LoginFormData) => {
-    await login(data.email, data.password);
-    toast.success("Welcome back to ReSell Hub! 👋");
-    window.location.href = callbackUrl;
+    try {
+      await login(data.email, data.password);
+      toast.success("Welcome back to ReSell Hub! 👋");
+      window.location.href = callbackUrl;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Login failed. Please check credentials or backend connection.";
+      toast.error(msg);
+    }
   };
 
   const handleGoogleClick = async () => {
     setIsGoogleLoading(true);
-    await googleLogin();
-    toast.success("Signed in with Google! 🎉");
-    window.location.href = callbackUrl;
+    try {
+      await googleLogin();
+      toast.success("Signed in with Google! 🎉");
+      window.location.href = callbackUrl;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Google sign-in failed.";
+      toast.error(msg);
+    } finally {
+      setIsGoogleLoading(false);
+    }
   };
 
   const [isDemoLoggingIn, setIsDemoLoggingIn] = useState<string | null>(null);

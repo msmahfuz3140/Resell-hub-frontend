@@ -59,21 +59,33 @@ function RegisterContent() {
   const selectedRole = watch("role");
 
   const onSubmit = async (data: RegisterFormData) => {
-    await authRegister({
-      name: data.name,
-      email: data.email,
-      password: data.password,
-      role: data.role,
-    });
-    toast.success("Account created! Welcome to ReSell Hub 🎉");
-    window.location.href = "/dashboard";
+    try {
+      await authRegister({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        role: data.role,
+      });
+      toast.success("Account created! Welcome to ReSell Hub 🎉");
+      window.location.href = "/dashboard";
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Registration failed. Please try again.";
+      toast.error(msg);
+    }
   };
 
   const handleGoogleClick = async () => {
     setIsGoogleLoading(true);
-    await googleLogin();
-    toast.success("Signed up with Google! 🎉");
-    window.location.href = "/dashboard";
+    try {
+      await googleLogin();
+      toast.success("Signed up with Google! 🎉");
+      window.location.href = "/dashboard";
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Google sign-in failed.";
+      toast.error(msg);
+    } finally {
+      setIsGoogleLoading(false);
+    }
   };
 
   return (
