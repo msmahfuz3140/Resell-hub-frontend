@@ -600,11 +600,11 @@ export default function ProductDetailPage() {
   const handleBuyNow = () => {
     if (!isAuthenticated) {
       toast.error("Please login to purchase items.");
-      router.push("/login");
+      router.push(`/login?redirect=/checkout?productId=${product?._id || id}`);
       return;
     }
     toast.success("Redirecting to Escrow Protected Checkout...");
-    router.push("/dashboard");
+    router.push(`/checkout?productId=${product?._id || id}`);
   };
 
   const handleChat = () => {

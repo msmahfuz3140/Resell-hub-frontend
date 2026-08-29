@@ -96,6 +96,21 @@ export const adminService = {
     const res = await api.put<ApiResponse<{ order: Order }>>(`/admin/orders/${orderId}/status`, data);
     return res.data;
   },
+
+  /**
+   * Get all marketplace payments for admin monitoring
+   */
+  getPayments: async (filters: { page?: number; limit?: number; search?: string; status?: string; paymentMethod?: string } = {}) => {
+    const params = new URLSearchParams();
+    if (filters.page) params.append("page", String(filters.page));
+    if (filters.limit) params.append("limit", String(filters.limit));
+    if (filters.search) params.append("search", filters.search);
+    if (filters.status && filters.status !== "all") params.append("status", filters.status);
+    if (filters.paymentMethod && filters.paymentMethod !== "all") params.append("paymentMethod", filters.paymentMethod);
+
+    const res = await api.get<PaginatedResponse<any>>(`/admin/payments?${params.toString()}`);
+    return res.data;
+  },
 };
 
 export default adminService;

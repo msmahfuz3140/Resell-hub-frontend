@@ -146,6 +146,34 @@ export interface Order {
   updatedAt: string;
 }
 
+// Payment Types
+export interface Payment {
+  _id: string;
+  orderId: string | Order;
+  buyerId: string | User;
+  sellerId: string | User;
+  transactionId: string;
+  stripePaymentIntentId?: string | null;
+  stripeChargeId?: string | null;
+  stripeSessionId?: string | null;
+  amount: number;
+  currency: string;
+  platformFee: number;
+  sellerAmount: number;
+  paymentMethod: "stripe" | "cash" | "bank_transfer";
+  paymentGateway?: "stripe" | "manual";
+  paymentStatus: "pending" | "processing" | "completed" | "failed" | "cancelled" | "refunded" | "partially_refunded";
+  paymentDate?: string | null;
+  refundedAt?: string | null;
+  refundAmount?: number;
+  refundReason?: string | null;
+  stripeRefundId?: string | null;
+  metadata?: Record<string, unknown>;
+  notes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Admin & Dashboard Types
 export interface AdminStats {
   totalUsers: number;
