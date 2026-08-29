@@ -126,14 +126,34 @@ function OverrideOrderModal({
   onClose: () => void;
   onSuccess: () => void;
 }) {
-  const [orderStatus, setOrderStatus] = useState(order.orderStatus);
-  const [paymentStatus, setPaymentStatus] = useState(order.paymentStatus);
+  const [orderStatus, setOrderStatus] = useState<Order["orderStatus"]>(order.orderStatus);
+  const [paymentStatus, setPaymentStatus] = useState<Order["paymentStatus"]>(order.paymentStatus);
   const [isUpdating, setIsUpdating] = useState(false);
+
+  const handleOrderStatusChange = (newStatus: Order["orderStatus"]) => {
+    setOrderStatus(newStatus);
+    if (newStatus === "cancelled" && paymentStatus === "paid") {
+      setPaymentStatus("refunded");
+    }
+    if (newStatus === "completed" && paymentStatus === "pending") {
+      setPaymentStatus("paid");
+    }
+  };
+
+  const handlePaymentStatusChange = (newStatus: Order["paymentStatus"]) => {
+    setPaymentStatus(newStatus);
+    if (newStatus === "refunded" && ["placed", "confirmed", "processing"].includes(orderStatus)) {
+      setOrderStatus("cancelled");
+    }
+  };
 
   const handleUpdate = async () => {
     setIsUpdating(true);
     try {
-      const data = await adminService.updateOrderStatus(order._id, { orderStatus, paymentStatus });
+      const data = await adminService.updateOrderStatus(order._id, {
+        orderStatus,
+        paymentStatus,
+      });
       if (data.success) {
         toast.success("Order status overridden by admin. 🛡️");
         onSuccess();
@@ -165,7 +185,7 @@ function OverrideOrderModal({
             <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wide">Order State</label>
             <select
               value={orderStatus}
-              onChange={(e) => setOrderStatus(e.target.value as Order["orderStatus"])}
+              onChange={(e) => handleOrderStatusChange(e.target.value as Order["orderStatus"])}
               className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold"
             >
               <option value="placed">Placed</option>
@@ -183,7 +203,7 @@ function OverrideOrderModal({
             <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wide">Payment State</label>
             <select
               value={paymentStatus}
-              onChange={(e) => setPaymentStatus(e.target.value as Order["paymentStatus"])}
+              onChange={(e) => handlePaymentStatusChange(e.target.value as Order["paymentStatus"])}
               className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold"
             >
               <option value="unpaid">Unpaid</option>
@@ -1602,7 +1622,11 @@ export default function AdminDashboard() {
         <OverrideOrderModal
           order={overrideOrderTarget}
           onClose={() => setOverrideOrderTarget(null)}
-          onSuccess={fetchOrders}
+          onSuccess={() => {
+            fetchOrders();
+            fetchPayments();
+            fetchStats();
+          }}
         />
       )}
 
