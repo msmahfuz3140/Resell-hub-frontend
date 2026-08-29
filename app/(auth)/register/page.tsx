@@ -167,9 +167,12 @@ function RegisterContent() {
             <span>Sign up with Google</span>
           </button>
 
-          <div className="relative flex items-center justify-center">
-            <div className="border-t border-slate-200 w-full" />
-            <span className="bg-white px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider relative">Or with Details</span>
+          <div className="flex items-center gap-3 my-1">
+            <div className="h-px bg-slate-200 flex-1" />
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider shrink-0">
+              Or with Details
+            </span>
+            <div className="h-px bg-slate-200 flex-1" />
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
