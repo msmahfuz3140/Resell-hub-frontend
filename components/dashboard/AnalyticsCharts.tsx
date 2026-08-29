@@ -338,21 +338,21 @@ export function MonthlyOrderChart({ data }: { data: MonthlyOrderData[] }) {
       </div>
 
       {/* ── Key Performance Indicators (KPI Mini Strip) ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div className="bg-gradient-to-br from-indigo-50/70 to-purple-50/40 p-4 rounded-2xl border border-indigo-100/80">
-          <span className="text-[10px] font-black uppercase tracking-wider text-indigo-500 block">Total GMV (6 Months)</span>
-          <span className="text-2xl font-black text-slate-900 mt-0.5 block">{formatCurrency(totalGMV)}</span>
-          <p className="text-[11px] text-slate-500 font-semibold mt-1">Platform gross merchandise volume</p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
+        <div className="bg-gradient-to-br from-indigo-50/70 to-purple-50/40 p-4 rounded-2xl border border-indigo-100/80 min-w-0">
+          <span className="text-[10px] font-black uppercase tracking-wider text-indigo-500 block truncate">Total GMV (6 Months)</span>
+          <span className="text-xl sm:text-2xl font-black text-slate-900 mt-0.5 block truncate" title={formatCurrency(totalGMV)}>{formatCurrency(totalGMV)}</span>
+          <p className="text-[11px] text-slate-500 font-semibold mt-1 truncate">Platform gross merchandise volume</p>
         </div>
-        <div className="bg-gradient-to-br from-emerald-50/70 to-teal-50/40 p-4 rounded-2xl border border-emerald-100/80">
-          <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600 block">Completed Transactions</span>
-          <span className="text-2xl font-black text-slate-900 mt-0.5 block">{totalOrdersCount} Orders</span>
-          <p className="text-[11px] text-emerald-600 font-bold mt-1">100% Escrow fulfilled</p>
+        <div className="bg-gradient-to-br from-emerald-50/70 to-teal-50/40 p-4 rounded-2xl border border-emerald-100/80 min-w-0">
+          <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600 block truncate">Completed Transactions</span>
+          <span className="text-xl sm:text-2xl font-black text-slate-900 mt-0.5 block truncate">{totalOrdersCount} Orders</span>
+          <p className="text-[11px] text-emerald-600 font-bold mt-1 truncate">100% Escrow fulfilled</p>
         </div>
-        <div className="bg-gradient-to-br from-purple-50/70 to-pink-50/40 p-4 rounded-2xl border border-purple-100/80">
-          <span className="text-[10px] font-black uppercase tracking-wider text-purple-600 block">Platform Net Revenue (5%)</span>
-          <span className="text-2xl font-black text-purple-700 mt-0.5 block">{formatCurrency(Math.round(totalGMV * 0.05))}</span>
-          <p className="text-[11px] text-purple-600 font-semibold mt-1">Earned via marketplace fees</p>
+        <div className="bg-gradient-to-br from-purple-50/70 to-pink-50/40 p-4 rounded-2xl border border-purple-100/80 min-w-0">
+          <span className="text-[10px] font-black uppercase tracking-wider text-purple-600 block truncate">Platform Net Revenue (5%)</span>
+          <span className="text-xl sm:text-2xl font-black text-purple-700 mt-0.5 block truncate" title={formatCurrency(Math.round(totalGMV * 0.05))}>{formatCurrency(Math.round(totalGMV * 0.05))}</span>
+          <p className="text-[11px] text-purple-600 font-semibold mt-1 truncate">Earned via marketplace fees</p>
         </div>
       </div>
 

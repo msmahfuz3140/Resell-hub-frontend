@@ -484,44 +484,46 @@ export default function BuyerDashboard({ user, onRefreshUser }: { user: User | n
   return (
     <div className="space-y-8">
       {/* ── Metric Cards ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200/90 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-            <ShoppingCart size={24} />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+        <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-sm flex items-center gap-3 sm:gap-4 min-w-0">
+          <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+            <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
-          <div>
-            <span className="text-xl sm:text-2xl font-black text-slate-900 block">{ordersMeta.total}</span>
-            <span className="text-xs font-bold text-slate-400">Total Orders</span>
-          </div>
-        </div>
-
-        <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200/90 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
-            <Heart size={24} />
-          </div>
-          <div>
-            <span className="text-xl sm:text-2xl font-black text-slate-900 block">{wishlist.length}</span>
-            <span className="text-xs font-bold text-slate-400">Saved Wishlist</span>
+          <div className="min-w-0 flex-1">
+            <span className="text-base sm:text-xl lg:text-2xl font-black text-slate-900 block truncate">{ordersMeta.total}</span>
+            <span className="text-[11px] sm:text-xs font-bold text-slate-400 block truncate">Total Orders</span>
           </div>
         </div>
 
-        <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200/90 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-            <CreditCard size={24} />
+        <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-sm flex items-center gap-3 sm:gap-4 min-w-0">
+          <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+            <Heart className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
-          <div>
-            <span className="text-xl sm:text-2xl font-black text-slate-900 block">{formatCurrency(totalSpent)}</span>
-            <span className="text-xs font-bold text-slate-400">Total Spent</span>
+          <div className="min-w-0 flex-1">
+            <span className="text-base sm:text-xl lg:text-2xl font-black text-slate-900 block truncate">{wishlist.length}</span>
+            <span className="text-[11px] sm:text-xs font-bold text-slate-400 block truncate">Saved Wishlist</span>
           </div>
         </div>
 
-        <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200/90 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-            <ShieldCheck size={24} />
+        <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-sm flex items-center gap-3 sm:gap-4 min-w-0">
+          <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+            <CreditCard className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
-          <div>
-            <span className="text-xl sm:text-2xl font-black text-slate-900 block">100%</span>
-            <span className="text-xs font-bold text-slate-400">Escrow Protected</span>
+          <div className="min-w-0 flex-1">
+            <span className="text-base sm:text-xl lg:text-2xl font-black text-slate-900 block truncate" title={formatCurrency(totalSpent)}>
+              {formatCurrency(totalSpent)}
+            </span>
+            <span className="text-[11px] sm:text-xs font-bold text-slate-400 block truncate">Total Spent</span>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-sm flex items-center gap-3 sm:gap-4 min-w-0">
+          <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+            <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <span className="text-base sm:text-xl lg:text-2xl font-black text-slate-900 block truncate">100%</span>
+            <span className="text-[11px] sm:text-xs font-bold text-slate-400 block truncate">Escrow Protected</span>
           </div>
         </div>
       </div>
