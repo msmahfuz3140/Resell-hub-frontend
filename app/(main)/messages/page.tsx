@@ -46,10 +46,22 @@ function MessagesContent() {
   const convPollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const activeConvIdRef = useRef<string | null>(null);
 
-  // Auto-scroll helper
-  const scrollToBottom = useCallback((smooth = true) => {
+  // Smart container-only scroll helper — NEVER scrolls the entire window
+  const scrollToBottom = useCallback((force = false, smooth = true) => {
     setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: smooth ? "smooth" : "auto" });
+      const container = scrollContainerRef.current;
+      if (!container) return;
+
+      // Only scroll if forced (e.g., initial load / user sending) or user is already near bottom (<= 150px)
+      const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+      const isNearBottom = distanceFromBottom < 150;
+
+      if (force || isNearBottom) {
+        container.scrollTo({
+          top: container.scrollHeight,
+          behavior: smooth ? "smooth" : "auto",
+        });
+      }
     }, 50);
   }, []);
 
@@ -146,7 +158,8 @@ function MessagesContent() {
             (incoming.length > 0 && incoming[incoming.length - 1]._id !== prev[prev.length - 1]?._id);
 
           if (isDiff) {
-            scrollToBottom(true);
+            // Only auto-scroll if user was already at the bottom (force = false)
+            scrollToBottom(false, true);
             return incoming;
           }
           return prev;
@@ -173,9 +186,9 @@ function MessagesContent() {
 
     if (pollingRef.current) clearInterval(pollingRef.current);
 
-    // 1. Immediate fetch
+    // 1. Immediate fetch (force scroll on initial load)
     fetchMessagesForActive(convId, true);
-    scrollToBottom(false);
+    scrollToBottom(true, false);
 
     // 2. Real-time fast polling every 1.5 seconds (like messenger)
     pollingRef.current = setInterval(() => {

@@ -48,9 +48,21 @@ export default function ChatWithSellerModal({
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const activeConvIdRef = useRef<string | null>(null);
 
-  const scrollToBottom = useCallback((smooth = true) => {
+  // Smart container-only scroll helper — NEVER scrolls the entire window
+  const scrollToBottom = useCallback((force = false, smooth = true) => {
     setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: smooth ? "smooth" : "auto" });
+      const container = scrollAreaRef.current;
+      if (!container) return;
+
+      const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+      const isNearBottom = distanceFromBottom < 150;
+
+      if (force || isNearBottom) {
+        container.scrollTo({
+          top: container.scrollHeight,
+          behavior: smooth ? "smooth" : "auto",
+        });
+      }
     }, 50);
   }, []);
 
@@ -68,7 +80,8 @@ export default function ChatWithSellerModal({
             incoming.length !== prev.length ||
             (incoming.length > 0 && incoming[incoming.length - 1]._id !== prev[prev.length - 1]?._id);
           if (isDiff) {
-            scrollToBottom(true);
+            // Only auto-scroll if user is already near bottom (force = false)
+            scrollToBottom(false, true);
             return incoming;
           }
           return prev;
@@ -103,9 +116,9 @@ export default function ChatWithSellerModal({
           setConversation(conv);
           activeConvIdRef.current = conv._id;
 
-          // Initial fetch
+          // Initial fetch (force scroll on open)
           await fetchMessagesForConv(conv._id, true);
-          scrollToBottom(false);
+          scrollToBottom(true, false);
 
           // Real-time polling every 1.5s while modal is open
           if (pollingRef.current) clearInterval(pollingRef.current);
