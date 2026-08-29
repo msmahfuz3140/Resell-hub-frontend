@@ -32,6 +32,10 @@ import {
   Clock,
   Zap,
   CreditCard,
+  Flag,
+  ShieldAlert,
+  FileText,
+  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCurrency, timeAgo, formatDate } from "@/lib/utils";
@@ -233,7 +237,7 @@ function OverrideOrderModal({
 
 // ─── Main Admin Dashboard ──────────────────────────
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<"analytics" | "users" | "products" | "orders" | "payments">("analytics");
+  const [activeTab, setActiveTab] = useState<"analytics" | "users" | "products" | "orders" | "payments" | "reports">("analytics");
 
   // Stats
   const [stats, setStats] = useState<AdminStats | null>(null);
@@ -276,6 +280,15 @@ export default function AdminDashboard() {
   const [paymentStatusFilter, setPaymentStatusFilter] = useState("all");
   const [paymentMethodFilter, setPaymentMethodFilter] = useState("all");
   const [paymentPage, setPaymentPage] = useState(1);
+
+  // Reports State
+  const [reports, setReports] = useState<any[]>([]);
+  const [reportsMeta, setReportsMeta] = useState({ page: 1, limit: 15, total: 0, totalPages: 1, hasNextPage: false, hasPrevPage: false });
+  const [reportsLoading, setReportsLoading] = useState(false);
+  const [reportStatusFilter, setReportStatusFilter] = useState("all");
+  const [reportReasonFilter, setReportReasonFilter] = useState("all");
+  const [reportPage, setReportPage] = useState(1);
+  const [selectedReportDetail, setSelectedReportDetail] = useState<any | null>(null);
 
   // Governance & Policy State
   const [commissionFee, setCommissionFee] = useState(5.0);
@@ -619,6 +632,42 @@ export default function AdminDashboard() {
     }
   }, [paymentSearch, paymentStatusFilter, paymentMethodFilter, paymentPage]);
 
+  // Fetch Reports
+  const fetchReports = useCallback(async () => {
+    setReportsLoading(true);
+    try {
+      const data = await adminService.getReports({
+        page: reportPage,
+        limit: 15,
+        status: reportStatusFilter !== "all" ? reportStatusFilter : undefined,
+        reason: reportReasonFilter !== "all" ? reportReasonFilter : undefined,
+      });
+      if (data.data) {
+        setReports(data.data);
+        setReportsMeta(data.meta || { page: 1, limit: 15, total: data.data.length, totalPages: 1, hasNextPage: false, hasPrevPage: false });
+        return;
+      }
+      throw new Error("No reports");
+    } catch {
+      const demoReports = [
+        {
+          _id: "rep-1",
+          reporterId: { _id: "u1", name: "Sadia Sultana", email: "sadia@gmail.com" },
+          productId: { _id: "prod-1", title: "Apple iPhone 15 Pro - 128GB", price: 94000, category: "Electronics", status: "active" },
+          sellerId: { _id: "user-1", name: "Tanzid Hossain", email: "tanzid.verified@resellhub.com" },
+          reason: "misleading_price",
+          description: "Seller asked for advance courier deposit outside platform.",
+          status: "pending",
+          createdAt: new Date(Date.now() - 3600000 * 4).toISOString(),
+        },
+      ];
+      setReports(demoReports);
+      setReportsMeta({ page: 1, limit: 15, total: demoReports.length, totalPages: 1, hasNextPage: false, hasPrevPage: false });
+    } finally {
+      setReportsLoading(false);
+    }
+  }, [reportPage, reportStatusFilter, reportReasonFilter]);
+
   useEffect(() => {
     fetchStats();
   }, [fetchStats]);
@@ -628,9 +677,37 @@ export default function AdminDashboard() {
     if (activeTab === "products") fetchProducts();
     if (activeTab === "orders") fetchOrders();
     if (activeTab === "payments") fetchPayments();
-  }, [activeTab, fetchUsers, fetchProducts, fetchOrders, fetchPayments]);
+    if (activeTab === "reports") fetchReports();
+  }, [activeTab, fetchUsers, fetchProducts, fetchOrders, fetchPayments, fetchReports]);
 
   // User actions
+  const handleToggleSellerVerification = async (user: User) => {
+    try {
+      const data = await adminService.toggleSellerVerification(user._id);
+      if (data.success) {
+        toast.success(`Seller ${user.name} verification status toggled!`);
+        fetchUsers();
+      } else {
+        toast.error(data.message || "Failed to update verification status");
+      }
+    } catch {
+      toast.error("Failed to update seller verification status");
+    }
+  };
+
+  const handleUpdateReportStatus = async (reportId: string, status: string, actionTaken?: string, adminNotes?: string) => {
+    try {
+      const data = await adminService.updateReport(reportId, { status, actionTaken, adminNotes });
+      if (data.success) {
+        toast.success(`Report status marked as ${status.toUpperCase()}!`);
+        fetchReports();
+        setSelectedReportDetail(null);
+      }
+    } catch {
+      toast.error("Failed to update report status");
+    }
+  };
+
   const handleToggleUserStatus = async (user: User) => {
     const nextStatus = user.status === "banned" ? "active" : "banned";
     try {
@@ -777,6 +854,14 @@ export default function AdminDashboard() {
           }`}
         >
           <CreditCard size={14} /> Payments & Escrow ({paymentsMeta.total || 18})
+        </button>
+        <button
+          onClick={() => setActiveTab("reports")}
+          className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-black shrink-0 transition-all whitespace-nowrap ${
+            activeTab === "reports" ? "bg-rose-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
+          }`}
+        >
+          <Flag size={14} /> Product Reports ({reportsMeta.total || 0})
         </button>
       </div>
 
@@ -1139,6 +1224,7 @@ export default function AdminDashboard() {
                   <tr>
                     <th className="py-3.5 px-4">User</th>
                     <th className="py-3.5 px-4">Role</th>
+                    <th className="py-3.5 px-4">Verification</th>
                     <th className="py-3.5 px-4">Status</th>
                     <th className="py-3.5 px-4">City</th>
                     <th className="py-3.5 px-4">Joined</th>
@@ -1165,6 +1251,21 @@ export default function AdminDashboard() {
                         }`}>
                           {u.role}
                         </span>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleSellerVerification(u)}
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase transition-all ${
+                            u.isVerifiedSeller
+                              ? "bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100"
+                              : "bg-slate-100 text-slate-400 border border-slate-200 hover:bg-slate-200 hover:text-slate-600"
+                          }`}
+                          title="Click to toggle verified seller badge"
+                        >
+                          <ShieldCheck size={11} className={u.isVerifiedSeller ? "text-blue-600" : "text-slate-400"} />
+                          <span>{u.isVerifiedSeller ? "Verified" : "Unverified"}</span>
+                        </button>
                       </td>
                       <td className="py-3.5 px-4">
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
@@ -1659,6 +1760,200 @@ export default function AdminDashboard() {
               total={paymentsMeta.total}
               limit={paymentsMeta.limit}
               onPageChange={setPaymentPage}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ── Tab 6: Product Reports Moderation Queue ── */}
+      {activeTab === "reports" && (
+        <div className="space-y-4">
+          {/* Header & Filter Controls */}
+          <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold">
+                <Flag size={16} />
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-slate-900">Trust & Safety Moderation Queue</h3>
+                <p className="text-[11px] text-slate-400">Review community reports and enforce platform safety policies</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <select
+                value={reportStatusFilter}
+                onChange={(e) => { setReportStatusFilter(e.target.value); setReportPage(1); }}
+                className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700"
+              >
+                <option value="all">All Statuses</option>
+                <option value="pending">Pending Review</option>
+                <option value="investigating">Investigating</option>
+                <option value="resolved">Resolved</option>
+                <option value="dismissed">Dismissed</option>
+              </select>
+
+              <select
+                value={reportReasonFilter}
+                onChange={(e) => { setReportReasonFilter(e.target.value); setReportPage(1); }}
+                className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700"
+              >
+                <option value="all">All Reasons</option>
+                <option value="scam">Scam / Fraud</option>
+                <option value="counterfeit">Counterfeit</option>
+                <option value="inappropriate_content">Inappropriate Content</option>
+                <option value="wrong_category">Wrong Category</option>
+                <option value="prohibited_item">Prohibited Item</option>
+                <option value="misleading_price">Misleading Price</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Reports Table */}
+          <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider">
+                  <tr>
+                    <th className="py-3.5 px-4">Reported Product</th>
+                    <th className="py-3.5 px-4">Reason & Description</th>
+                    <th className="py-3.5 px-4">Reporter & Seller</th>
+                    <th className="py-3.5 px-4">Status</th>
+                    <th className="py-3.5 px-4">Date</th>
+                    <th className="py-3.5 px-4 text-right">Moderation Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+                  {reportsLoading ? (
+                    <tr>
+                      <td colSpan={6} className="py-12 text-center text-slate-400">
+                        <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-rose-600" />
+                        <span>Loading safety reports...</span>
+                      </td>
+                    </tr>
+                  ) : reports.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="py-12 text-center text-slate-400 font-bold">
+                        <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto mb-2 opacity-80" />
+                        <span>No reports found matching your criteria. Everything is in good standing!</span>
+                      </td>
+                    </tr>
+                  ) : (
+                    reports.map((rep) => {
+                      const prodTitle = rep.productId?.title || "Listing #" + rep.productId;
+                      const prodPrice = rep.productId?.price;
+                      const reporterName = rep.reporterId?.name || "Anonymous Buyer";
+                      const sellerName = rep.sellerId?.name || "Marketplace Seller";
+
+                      return (
+                        <tr key={rep._id} className="hover:bg-slate-50/60 transition-colors">
+                          {/* Product */}
+                          <td className="py-3.5 px-4 max-w-[200px]">
+                            <span className="font-bold text-slate-900 line-clamp-1 block">{prodTitle}</span>
+                            {prodPrice && (
+                              <span className="text-[11px] font-black text-emerald-600 block">
+                                {formatCurrency(prodPrice)}
+                              </span>
+                            )}
+                            {rep.productId?._id && (
+                              <Link
+                                href={`/listings/${rep.productId._id}`}
+                                target="_blank"
+                                className="text-[10px] text-indigo-600 hover:underline inline-flex items-center gap-0.5 mt-0.5"
+                              >
+                                View Listing <ArrowUpRight size={10} />
+                              </Link>
+                            )}
+                          </td>
+
+                          {/* Reason & Details */}
+                          <td className="py-3.5 px-4 max-w-[240px]">
+                            <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-rose-50 text-rose-700 border border-rose-200 mb-1">
+                              {rep.reason.replace("_", " ")}
+                            </span>
+                            <p className="text-[11px] text-slate-600 line-clamp-2 leading-relaxed">
+                              {rep.description}
+                            </p>
+                          </td>
+
+                          {/* Reporter / Seller */}
+                          <td className="py-3.5 px-4 text-[11px]">
+                            <div><span className="text-slate-400">By:</span> <strong>{reporterName}</strong></div>
+                            <div className="mt-0.5"><span className="text-slate-400">Seller:</span> <span className="text-slate-800 font-semibold">{sellerName}</span></div>
+                          </td>
+
+                          {/* Status */}
+                          <td className="py-3.5 px-4">
+                            <span
+                              className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${
+                                rep.status === "resolved"
+                                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                  : rep.status === "investigating"
+                                  ? "bg-amber-50 text-amber-700 border border-amber-200"
+                                  : rep.status === "dismissed"
+                                  ? "bg-slate-100 text-slate-500 border border-slate-200"
+                                  : "bg-rose-50 text-rose-700 border border-rose-200"
+                              }`}
+                            >
+                              {rep.status}
+                            </span>
+                          </td>
+
+                          {/* Date */}
+                          <td className="py-3.5 px-4 text-slate-400 text-[11px]">
+                            {timeAgo(rep.createdAt)}
+                          </td>
+
+                          {/* Actions */}
+                          <td className="py-3.5 px-4 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              {rep.status === "pending" && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateReportStatus(rep._id, "investigating")}
+                                  className="px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 transition-colors"
+                                  title="Mark investigating"
+                                >
+                                  Investigate
+                                </button>
+                              )}
+                              {rep.status !== "resolved" && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateReportStatus(rep._id, "resolved", "product_removed")}
+                                  className="px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 transition-colors"
+                                  title="Remove product listing and resolve report"
+                                >
+                                  Remove Item
+                                </button>
+                              )}
+                              {rep.status !== "dismissed" && rep.status !== "resolved" && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateReportStatus(rep._id, "dismissed")}
+                                  className="px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200 transition-colors"
+                                  title="Dismiss false report"
+                                >
+                                  Dismiss
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <Pagination
+              page={reportsMeta.page}
+              totalPages={reportsMeta.totalPages}
+              total={reportsMeta.total}
+              limit={reportsMeta.limit}
+              onPageChange={setReportPage}
             />
           </div>
         </div>

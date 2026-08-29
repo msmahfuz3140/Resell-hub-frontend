@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import ProductCard from "@/components/ui/ProductCard";
 import LocationSelector from "@/components/ui/LocationSelector";
+import RecentlyViewedSection from "@/components/ui/RecentlyViewedSection";
 import productService from "@/services/productService";
 import type { Product } from "@/types";
 
@@ -405,6 +406,11 @@ export default function HomePage() {
               <span>Explore All 50,000+ Items</span>
               <ArrowRight size={16} />
             </Link>
+          </div>
+
+          {/* ── Recently Viewed Products (Dynamic) ── */}
+          <div className="mt-8">
+            <RecentlyViewedSection />
           </div>
         </div>
       </section>

@@ -5,6 +5,9 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import { SITE_CONFIG } from "@/lib/constants";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
+import { CompareProvider } from "@/contexts/CompareContext";
+import CompareFloatingBar from "@/components/ui/CompareFloatingBar";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -42,23 +45,28 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} font-sans antialiased bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200`}>
         <Script
           src="https://accounts.google.com/gsi/client"
           strategy="afterInteractive"
           id="google-gsi-client"
         />
-        <AuthProvider>
-          {children}
-          <Toaster
-            position="top-right"
-            richColors
-            closeButton
-            toastOptions={{
-              style: { fontFamily: "var(--font-inter)" },
-            }}
-          />
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <CompareProvider>
+              {children}
+              <CompareFloatingBar />
+              <Toaster
+                position="top-right"
+                richColors
+                closeButton
+                toastOptions={{
+                  style: { fontFamily: "var(--font-inter)" },
+                }}
+              />
+            </CompareProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

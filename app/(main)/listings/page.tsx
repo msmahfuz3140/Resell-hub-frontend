@@ -293,6 +293,7 @@ function ListingsContent() {
   const [selectedCondition, setSelectedCondition] = useState("All");
   const [selectedCity, setSelectedCity] = useState("All Locations");
   const [sortBy, setSortBy] = useState("-createdAt");
+  const [priceMin, setPriceMin] = useState<number>(0);
   const [priceMax, setPriceMax] = useState<number>(250000);
   const [page, setPage] = useState(1);
   const [showMobileFilter, setShowMobileFilter] = useState(false);
@@ -302,6 +303,7 @@ function ListingsContent() {
   const [isLoading, setIsLoading] = useState(true);
 
   const debouncedSearch = useDebounce(search, 300);
+  const debouncedPriceMin = useDebounce(priceMin, 400);
   const debouncedPriceMax = useDebounce(priceMax, 400);
 
   // Filter fallback products locally if API is connecting/offline
@@ -324,6 +326,14 @@ function ListingsContent() {
     if (selectedCondition !== "All") {
       list = list.filter((p) => p.condition === selectedCondition);
     }
+    if (selectedCity && selectedCity !== "All Locations") {
+      list = list.filter((p) =>
+        p.location?.city?.toLowerCase().includes(selectedCity.toLowerCase())
+      );
+    }
+    if (debouncedPriceMin > 0) {
+      list = list.filter((p) => p.price >= debouncedPriceMin);
+    }
     if (debouncedPriceMax < 250000) {
       list = list.filter((p) => p.price <= debouncedPriceMax);
     }
@@ -340,7 +350,7 @@ function ListingsContent() {
     }
 
     return list;
-  }, [debouncedSearch, selectedCategory, selectedCondition, debouncedPriceMax, sortBy]);
+  }, [debouncedSearch, selectedCategory, selectedCondition, selectedCity, debouncedPriceMin, debouncedPriceMax, sortBy]);
 
   const fetchProducts = useCallback(async () => {
     setIsLoading(true);
@@ -349,20 +359,29 @@ function ListingsContent() {
         search: debouncedSearch || undefined,
         category: selectedCategory !== "All" ? selectedCategory : undefined,
         condition: selectedCondition !== "All" ? selectedCondition : undefined,
+        minPrice: debouncedPriceMin > 0 ? debouncedPriceMin : undefined,
         maxPrice: debouncedPriceMax < 250000 ? debouncedPriceMax : undefined,
         sort: sortBy,
         page,
         limit: 12,
       });
-      setProducts(data.data || []);
-      setMeta(data.meta || { page: 1, limit: 12, total: (data.data || []).length, totalPages: 1, hasNextPage: false, hasPrevPage: false });
+      if (data.data && data.data.length > 0) {
+        setProducts(data.data);
+        setMeta(data.meta || { page: 1, limit: 12, total: data.data.length, totalPages: 1, hasNextPage: false, hasPrevPage: false });
+      } else {
+        // Fallback filter
+        const fallback = getFilteredFallback();
+        setProducts(fallback);
+        setMeta({ page: 1, limit: 12, total: fallback.length, totalPages: Math.ceil(fallback.length / 12) || 1, hasNextPage: false, hasPrevPage: false });
+      }
     } catch {
-      setProducts([]);
-      setMeta({ page: 1, limit: 12, total: 0, totalPages: 1, hasNextPage: false, hasPrevPage: false });
+      const fallback = getFilteredFallback();
+      setProducts(fallback);
+      setMeta({ page: 1, limit: 12, total: fallback.length, totalPages: Math.ceil(fallback.length / 12) || 1, hasNextPage: false, hasPrevPage: false });
     } finally {
       setIsLoading(false);
     }
-  }, [debouncedSearch, selectedCategory, selectedCondition, debouncedPriceMax, sortBy, page]);
+  }, [debouncedSearch, selectedCategory, selectedCondition, selectedCity, debouncedPriceMin, debouncedPriceMax, sortBy, page, getFilteredFallback]);
 
   useEffect(() => {
     fetchProducts();
@@ -602,26 +621,59 @@ function ListingsContent() {
                 <LocationSelector value={selectedCity} onChange={setSelectedCity} className="w-full" />
               </div>
 
-              {/* Price Slider */}
+              {/* Price Range (Min - Max & Quick Chips) */}
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400">Max Price</h4>
-                  <span className="text-xs font-black text-indigo-600">
-                    {priceMax < 250000 ? `৳ ${priceMax.toLocaleString()}` : "Any"}
-                  </span>
+                <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400 mb-3">Price Range (BDT)</h4>
+                <div className="grid grid-cols-2 gap-2 mb-3">
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 block mb-1">Min Price</label>
+                    <input
+                      type="number"
+                      placeholder="0"
+                      min={0}
+                      value={priceMin || ""}
+                      onChange={(e) => setPriceMin(Number(e.target.value) || 0)}
+                      className="w-full text-xs font-bold p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white outline-hidden focus:border-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 block mb-1">Max Price</label>
+                    <input
+                      type="number"
+                      placeholder="250000"
+                      min={0}
+                      value={priceMax >= 250000 ? "" : priceMax}
+                      onChange={(e) => setPriceMax(Number(e.target.value) || 250000)}
+                      className="w-full text-xs font-bold p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white outline-hidden focus:border-indigo-500"
+                    />
+                  </div>
                 </div>
-                <input
-                  type="range"
-                  min={1000}
-                  max={250000}
-                  step={2000}
-                  value={priceMax}
-                  onChange={(e) => setPriceMax(Number(e.target.value))}
-                  className="w-full accent-indigo-600 cursor-pointer"
-                />
-                <div className="flex justify-between text-[10px] text-slate-400 mt-1 font-bold">
-                  <span>৳ 1,000</span>
-                  <span>৳ 250,000+</span>
+
+                {/* Quick Price Buckets */}
+                <div className="grid grid-cols-2 gap-1.5">
+                  {[
+                    { label: "Under ৳10k", min: 0, max: 10000 },
+                    { label: "৳10k - ৳50k", min: 10000, max: 50000 },
+                    { label: "৳50k - ৳100k", min: 50000, max: 100000 },
+                    { label: "৳100k+", min: 100000, max: 500000 },
+                  ].map((chip) => (
+                    <button
+                      key={chip.label}
+                      type="button"
+                      onClick={() => {
+                        setPriceMin(chip.min);
+                        setPriceMax(chip.max);
+                        setPage(1);
+                      }}
+                      className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
+                        priceMin === chip.min && priceMax === chip.max
+                          ? "bg-indigo-600 text-white"
+                          : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                      }`}
+                    >
+                      {chip.label}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>

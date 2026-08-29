@@ -16,6 +16,8 @@ export interface User {
   };
   bio?: string | null;
   isVerified?: boolean;
+  isVerifiedSeller?: boolean;
+  verifiedAt?: string | null;
   isActive?: boolean;
   rating?: {
     average: number;
@@ -42,6 +44,7 @@ export interface SellerInfo {
   phone?: string | null;
   rating?: number;
   totalSales?: number;
+  isVerifiedSeller?: boolean;
   location?: {
     city?: string | null;
     country?: string | null;

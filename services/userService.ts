@@ -3,6 +3,32 @@ import type { ApiResponse, PaginatedResponse, Product, User } from "@/types";
 
 export const userService = {
   /**
+   * Get public profile by user ID
+   */
+  getPublicProfile: async (userId: string) => {
+    const res = await api.get<ApiResponse<{ user: User }>>(`/users/${userId}`);
+    return res.data;
+  },
+
+  /**
+   * Get user's public product listings
+   */
+  getUserListings: async (userId: string, page = 1, limit = 12) => {
+    const res = await api.get<PaginatedResponse<Product>>(
+      `/users/${userId}/listings?page=${page}&limit=${limit}&status=active`
+    );
+    return res.data;
+  },
+
+  /**
+   * Get seller reviews
+   */
+  getUserReviews: async (userId: string, page = 1, limit = 10) => {
+    const res = await api.get<PaginatedResponse<any>>(`/users/${userId}/reviews?page=${page}&limit=${limit}`);
+    return res.data;
+  },
+
+  /**
    * Get user's favorites
    */
   getMyFavorites: async (page = 1, limit = 12) => {

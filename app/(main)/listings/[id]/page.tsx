@@ -25,6 +25,9 @@ import {
   Tag,
   User as UserIcon,
   ImageOff,
+  Scale,
+  Flag,
+  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCurrency, timeAgo } from "@/lib/utils";
@@ -32,9 +35,13 @@ import ProductCard from "@/components/ui/ProductCard";
 import ProductImage from "@/components/ui/ProductImage";
 import { productService } from "@/services/productService";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCompare } from "@/contexts/CompareContext";
 import { isLocalFavorite, toggleLocalFavorite } from "@/lib/favorites";
 import { findCustomProductById } from "@/lib/customProducts";
+import { addRecentlyViewed } from "@/lib/recentlyViewed";
+import RecentlyViewedSection from "@/components/ui/RecentlyViewedSection";
 import ChatWithSellerModal from "@/components/chat/ChatWithSellerModal";
+import ReportProductModal from "@/components/ui/ReportProductModal";
 import type { Product } from "@/types";
 
 // ─── Review Types ─────────────────────────────────
@@ -453,6 +460,8 @@ export default function ProductDetailPage() {
   const [isFavorited, setIsFavorited] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const { toggleCompare, isInCompare } = useCompare();
 
   // Fetch product with fallback support
   const fetchProduct = useCallback(async () => {
@@ -564,6 +573,13 @@ export default function ProductDetailPage() {
     fetchProduct();
     fetchReviews();
   }, [fetchProduct, fetchReviews]);
+
+  // Track recently viewed products
+  useEffect(() => {
+    if (product) {
+      addRecentlyViewed(product);
+    }
+  }, [product]);
 
   const handleFavorite = async () => {
     if (!isAuthenticated) {
@@ -1080,36 +1096,53 @@ export default function ProductDetailPage() {
                     <Lock size={18} />
                     <span>Buy with Escrow Protection</span>
                   </button>
-                  <button
-                    type="button"
-                    onClick={handleChat}
-                    className="w-full py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center justify-center gap-2 transition-all border border-slate-200"
-                  >
-                    <MessageCircle size={17} />
-                    <span>Chat with Seller</span>
-                  </button>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <button
+                      type="button"
+                      onClick={handleChat}
+                      className="py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs flex items-center justify-center gap-1.5 transition-all border border-slate-200 dark:border-slate-700"
+                    >
+                      <MessageCircle size={15} />
+                      <span>Chat Seller</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => toggleCompare(product)}
+                      className={`py-3 rounded-2xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all border ${
+                        isInCompare(product._id)
+                          ? "bg-indigo-600 text-white border-indigo-600"
+                          : "bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700"
+                      }`}
+                    >
+                      {isInCompare(product._id) ? <Check size={15} /> : <Scale size={15} />}
+                      <span>{isInCompare(product._id) ? "In Compare" : "Compare"}</span>
+                    </button>
+                  </div>
                 </div>
               ) : (
-                <div className="py-4 text-center rounded-2xl bg-slate-100 border border-slate-200">
-                  <span className="text-sm font-black text-slate-500">
+                <div className="py-4 text-center rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                  <span className="text-sm font-black text-slate-500 dark:text-slate-400">
                     {product.status === "sold" ? "This item has been sold" : "This listing is not available"}
                   </span>
                 </div>
               )}
 
               {/* Escrow Guarantee */}
-              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-2xl border border-indigo-100 space-y-1.5">
-                <div className="flex items-center gap-2 text-indigo-900 font-black text-xs">
-                  <ShieldCheck size={16} className="text-indigo-600" /> ReSell Hub Escrow Guarantee
+              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/40 dark:to-purple-950/40 p-4 rounded-2xl border border-indigo-100 dark:border-indigo-800/60 space-y-1.5">
+                <div className="flex items-center gap-2 text-indigo-900 dark:text-indigo-300 font-black text-xs">
+                  <ShieldCheck size={16} className="text-indigo-600 dark:text-indigo-400" /> ReSell Hub Escrow Guarantee
                 </div>
-                <p className="text-[11px] text-slate-600 leading-relaxed">
+                <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
                   Your payment is held securely until you confirm receipt and item condition.
                 </p>
               </div>
 
-              {/* Seller Mini Card */}
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                <div className="flex items-center gap-3">
+              {/* Seller Mini Card with Profile Link */}
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <Link
+                  href={`/seller/${product.sellerInfo?.sellerId || product.seller?._id || "seller"}`}
+                  className="flex items-center gap-3 group hover:opacity-80 transition-opacity"
+                >
                   <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black text-sm overflow-hidden">
                     {product.sellerInfo?.photo ? (
                       <img src={product.sellerInfo.photo} alt={product.sellerInfo.name} className="w-full h-full object-cover" />
@@ -1118,14 +1151,26 @@ export default function ProductDetailPage() {
                     )}
                   </div>
                   <div>
-                    <h4 className="font-bold text-xs text-slate-900">{product.sellerInfo?.name}</h4>
+                    <h4 className="font-bold text-xs text-slate-900 dark:text-white group-hover:text-indigo-600 transition-colors">
+                      {product.sellerInfo?.name}
+                    </h4>
                     <div className="flex items-center gap-1 text-[11px] text-amber-500 font-bold">
                       <Star size={11} fill="#f59e0b" />
                       {product.sellerInfo?.rating ? Number(product.sellerInfo.rating).toFixed(1) : "5.0"} ({product.sellerInfo?.totalSales || 0} sales)
                     </div>
                   </div>
+                </Link>
+                <div className="flex items-center gap-2">
+                  <span className="badge badge-success text-[10px] font-bold py-0.5">Verified</span>
+                  <button
+                    type="button"
+                    onClick={() => setIsReportModalOpen(true)}
+                    className="text-slate-400 hover:text-rose-500 p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+                    title="Report this listing"
+                  >
+                    <Flag size={14} />
+                  </button>
                 </div>
-                <span className="badge badge-success text-[10px] font-bold py-0.5">Verified</span>
               </div>
             </div>
           </div>
@@ -1133,13 +1178,13 @@ export default function ProductDetailPage() {
 
         {/* Related Products */}
         {relatedProducts.length > 0 && (
-          <div className="pt-10 border-t border-slate-200">
+          <div className="pt-10 border-t border-slate-200 dark:border-slate-800">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h2 className="text-2xl font-black text-slate-900 tracking-tight">Similar Listings</h2>
-                <p className="text-xs text-slate-500 mt-0.5">From the same category</p>
+                <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Similar Listings</h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">From the same category</p>
               </div>
-              <Link href={`/listings?category=${product.category}`} className="text-xs font-black text-indigo-600 hover:text-indigo-800">
+              <Link href={`/listings?category=${product.category}`} className="text-xs font-black text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300">
                 Browse all in {product.category} →
               </Link>
             </div>
@@ -1150,6 +1195,9 @@ export default function ProductDetailPage() {
             </div>
           </div>
         )}
+
+        {/* Recently Viewed Section */}
+        {product && <RecentlyViewedSection currentProductId={product._id} />}
       </div>
 
       {/* ── Interactive Chat With Seller Modal ── */}
@@ -1158,6 +1206,15 @@ export default function ProductDetailPage() {
           product={product}
           isOpen={isChatModalOpen}
           onClose={() => setIsChatModalOpen(false)}
+        />
+      )}
+
+      {/* ── Product Reporting Modal ── */}
+      {product && (
+        <ReportProductModal
+          product={product}
+          isOpen={isReportModalOpen}
+          onClose={() => setIsReportModalOpen(false)}
         />
       )}
     </div>

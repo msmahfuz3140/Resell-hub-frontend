@@ -98,6 +98,42 @@ export const adminService = {
   },
 
   /**
+   * Toggle verified seller status
+   */
+  toggleSellerVerification: async (userId: string, isVerified?: boolean) => {
+    const res = await api.put<ApiResponse<{ user: User; isVerifiedSeller: boolean }>>(
+      `/admin/users/${userId}/verify`,
+      { isVerified }
+    );
+    return res.data;
+  },
+
+  /**
+   * Get all product reports for admin review
+   */
+  getReports: async (filters: { page?: number; limit?: number; status?: string; reason?: string } = {}) => {
+    const params = new URLSearchParams();
+    if (filters.page) params.append("page", String(filters.page));
+    if (filters.limit) params.append("limit", String(filters.limit));
+    if (filters.status && filters.status !== "all") params.append("status", filters.status);
+    if (filters.reason && filters.reason !== "all") params.append("reason", filters.reason);
+
+    const res = await api.get<PaginatedResponse<any>>(`/reports?${params.toString()}`);
+    return res.data;
+  },
+
+  /**
+   * Review and resolve report
+   */
+  updateReport: async (
+    reportId: string,
+    data: { status: string; adminNotes?: string; actionTaken?: string }
+  ) => {
+    const res = await api.put<ApiResponse<any>>(`/reports/${reportId}`, data);
+    return res.data;
+  },
+
+  /**
    * Get all marketplace payments for admin monitoring
    */
   getPayments: async (filters: { page?: number; limit?: number; search?: string; status?: string; paymentMethod?: string } = {}) => {
